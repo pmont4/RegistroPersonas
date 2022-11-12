@@ -83,9 +83,9 @@ public class VentanaBorrar extends javax.swing.JFrame {
     private void btnBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrarActionPerformed
         try {
             if (!fieldIngresar.getText().isEmpty()) {
-                Persona persona = App.getPersonaControlador().getPersona(Integer.parseInt(fieldIngresar.getText()));
-                if (App.getPersonaControlador().existe_persona(persona)) {
-                    App.getPersonaControlador().removePersona(persona.getId());
+                Persona persona = (Persona) App.getPersonaControlador().getEntidad(fieldIngresar.getText());
+                if (App.getPersonaControlador().existsEntidad(persona)) {
+                    App.getPersonaControlador().deleteEntidad(persona.getId().toString());
                     JOptionPane.showMessageDialog(null, persona.getNombre() + " fue correctamente eliminado/a de la base de datos", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     JOptionPane.showMessageDialog(null, "El ID '" + fieldIngresar.getText() + "' no fue encontrado en la base de datos", "Error - persona no encontrada", JOptionPane.ERROR_MESSAGE);
