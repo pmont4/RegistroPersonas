@@ -84,7 +84,7 @@ public class VentanaBorrar extends javax.swing.JFrame {
         try {
             if (!fieldIngresar.getText().isEmpty()) {
                 Persona persona = (Persona) App.getPersonaControlador().getEntidad(fieldIngresar.getText());
-                if (App.getPersonaControlador().existsEntidad(persona)) {
+                if (App.getPersonaControlador().existsEntidad(persona.getId().toString())) {
                     App.getPersonaControlador().deleteEntidad(persona.getId().toString());
                     JOptionPane.showMessageDialog(null, persona.getNombre() + " fue correctamente eliminado/a de la base de datos", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
                 } else {

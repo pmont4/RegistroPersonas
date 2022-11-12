@@ -81,11 +81,11 @@ public class MySQLConector {
                 this.connection = DriverManager.getConnection(url, this.getUser(), this.getPassword());
                 
                 if (this.getConnection() != null) {
-                    this.execute("CREATE TABLE IF NOT EXISTS personas ('id' INT NOT NULL AUTO_INCREMENT, 'nombre' VARCHAR(50) NOT NULL, 'altura' VARCHAR(6), 'genero' VARCHAR(1) NOT NULL, PRIMARY KEY('id'))");
-                    this.execute("CREATE TABLE IF NOT EXISTS admins ('nombre' VARCHAR(50) NOT NULL, 'contrasena' varchar(32) NOT NULL, 'correo' VARCHAR(60) NOT NULL, PRIMARY KEY('correo'))");
+                    this.execute("CREATE TABLE IF NOT EXISTS personas (id INT NOT NULL AUTO_INCREMENT, nombre VARCHAR(50) NOT NULL, altura VARCHAR(6), genero VARCHAR(1) NOT NULL, PRIMARY KEY(id))");
+                    this.execute("CREATE TABLE IF NOT EXISTS admins (nombre VARCHAR(50) NOT NULL, contrasena varchar(32) NOT NULL, correo VARCHAR(60) NOT NULL, PRIMARY KEY(correo))");
                 }
             } catch (ClassNotFoundException | SQLException ex) {
-                System.out.println("Un error ha ocurrido >> " + ex.getLocalizedMessage());
+                System.out.println("Un error ha ocurrido >> " + ex.getClass().getName() + ", ERROR: " + ex.getLocalizedMessage());
             }
         }
     }

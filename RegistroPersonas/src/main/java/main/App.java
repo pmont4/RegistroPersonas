@@ -1,6 +1,7 @@
 package main;
 
 import conector.MySQLConector;
+import controladores.AdministradorControlador;
 import controladores.Controlador;
 import controladores.PersonaControlador;
 import ventanas.VentanaBorrar;
@@ -10,49 +11,33 @@ import ventanas.VentanaRegistro;
 public class App {
     
     private static MySQLConector mySQL;
-    
     public static MySQLConector getMySQL() throws Exception {
-        if (mySQL != null) {
-            return mySQL;
-        } else {
-            return null;
-        }
+        return mySQL == null ? null : mySQL;
     }
     
     private static VentanaRegistro ventanaRegistro;
-    
     public static VentanaRegistro getVentanaRegistro() {
-        return ventanaRegistro;
+        return ventanaRegistro == null ? null : ventanaRegistro;
     }
     
     private static VentanaPrincipal ventanaPrincipal;
-    
     public static VentanaPrincipal getVentanaPrincipal() {
-        if (ventanaPrincipal != null) {
-            return ventanaPrincipal;
-        } else {
-            return null;
-        }
+        return ventanaPrincipal == null ? null : ventanaPrincipal;
     }
     
     private static VentanaBorrar ventanaBorrar;
-    
     public static VentanaBorrar getVentanaBorrar() {
-        if (ventanaBorrar != null) {
-            return ventanaBorrar;
-        } else {
-            return null;
-        }
+        return ventanaBorrar == null ? null : ventanaBorrar;
     }
     
     private static Controlador personaControlador;
-    
     public static Controlador getPersonaControlador() {
-        if (personaControlador != null) {
-            return personaControlador;
-        } else {
-            return null;
-        }
+        return personaControlador == null ? null : personaControlador;
+    }
+    
+    private static Controlador adminControlador;
+    public static Controlador getAdminControlador() {
+        return adminControlador == null ? null : adminControlador;
     }
     
     public static void main(String[] args) {
@@ -61,6 +46,7 @@ public class App {
             getMySQL().conectar();
             
             personaControlador = new PersonaControlador();
+            adminControlador = new AdministradorControlador();
             
             ventanaPrincipal = new VentanaPrincipal();
             getVentanaPrincipal().setVisible(true);

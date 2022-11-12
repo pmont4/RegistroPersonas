@@ -85,7 +85,7 @@ public class PersonaControlador implements Controlador {
             }
         }
         
-        if (!(this.existsEntidad(persona))) {
+        if (!(this.existsEntidad(persona.getId().toString()))) {
             this.getLista_personas().add(persona);
         }
     }
@@ -113,16 +113,25 @@ public class PersonaControlador implements Controlador {
         this.execute("DELETE FROM personas WHERE id = " + Integer.parseInt(propiedad));
         
         Persona persona = (Persona) this.getEntidad(propiedad);
-        if (this.existsEntidad(persona)) {
+        if (this.existsEntidad(propiedad)) {
             this.getLista_personas().remove(persona);
         }
     }
 
     @Override
-    public boolean existsEntidad(Object entidad) throws Exception {
-        if (entidad == Persona.class) {
-            entidad = new Persona();
-            return this.getLista_personas().contains(entidad);
+    public boolean existsEntidad(String propiedad) throws Exception {
+        try (Statement stmt = this.getConn().createStatement()) {
+            try (ResultSet rs = stmt.executeQuery("SELECT * FROM personas WHERE id = " + Integer.parseInt(propiedad))) {
+                if (rs.next()) {
+                    Persona persona = new Persona();
+                    persona.setId(rs.getInt("id"));
+                    persona.setNombre(rs.getString("nombre"));
+                    persona.setEdad(rs.getInt("edad"));
+                    persona.setAltura(rs.getString("altura"));
+                    persona.setGenero(rs.getString("genero").charAt(0));
+                    return this.getLista_personas().contains(persona);
+                }
+            }
         }
         return false;
     }
