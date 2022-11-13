@@ -23,7 +23,6 @@ public class PersonaControlador implements Controlador {
         return lista_personas;
     }
     
-    private Connection conn;
     private Connection getConn() throws Exception {
         return App.getMySQL() == null ? null : App.getMySQL().getConnection();
     }
