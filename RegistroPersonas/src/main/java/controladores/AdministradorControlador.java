@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import main.App;
 import objetos.Administrador;
@@ -44,6 +45,10 @@ public class AdministradorControlador implements Controlador {
                         admin.setNombre(rs.getString("nombre"));
                         admin.setContrasena(rs.getString("contrasena"));
                         admin.setCorreo(rs.getString("correo"));
+                        
+                        String[] permisos = rs.getString("permisos").split("\\,");
+                        admin.setPermisos(Arrays.asList(permisos));
+                        System.out.println(admin.getPermisos() + " " + admin.getNombre());
 
                         if (!this.getLista_admins().contains(admin)) {
                             this.getLista_admins().add(admin);

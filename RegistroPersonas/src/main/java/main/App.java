@@ -4,6 +4,9 @@ import conector.MySQLConector;
 import controladores.AdministradorControlador;
 import controladores.Controlador;
 import controladores.PersonaControlador;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import objetos.Administrador;
 import ventanas.VentanaBorrar;
 import ventanas.VentanaPrincipal;
 import ventanas.VentanaRegistro;
@@ -56,5 +59,23 @@ public class App {
         } catch (Exception ex) {
             System.out.println("Un error ha ocurrido >> " + ex.getMessage());
         }
+    }
+    
+    private static Administrador adminOnline;
+    
+    public static void setAdminOnline(Administrador admin) throws Exception {
+        try (Statement stmt = getMySQL().getConnection().createStatement()) {
+            try (ResultSet rs = stmt.executeQuery("SELECT * FROM admins WHERE correo = " + admin.getCorreo())) {
+                if (rs.next()) {
+                    adminOnline = admin;
+                } else {
+                    adminOnline = null;
+                }
+            }
+        }
+    }
+    
+    public static Administrador getAdminOnline() {
+        return adminOnline == null ? null : adminOnline;
     }
 }

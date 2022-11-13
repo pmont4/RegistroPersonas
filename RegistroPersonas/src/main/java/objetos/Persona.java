@@ -62,27 +62,14 @@ public class Persona {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 59 * hash + Objects.hashCode(this.nombre);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Persona other = (Persona) obj;
-        if (!Objects.equals(this.nombre, other.nombre)) {
-            return false;
-        }
-        return true;
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Persona{id=").append(id);
+        sb.append(", nombre=").append(nombre);
+        sb.append(", edad=").append(edad);
+        sb.append(", altura=").append(altura);
+        sb.append(", genero=").append(genero);
+        sb.append('}');
+        return sb.toString();
     }
 }
