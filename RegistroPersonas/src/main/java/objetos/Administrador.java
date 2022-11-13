@@ -55,7 +55,7 @@ public class Administrador {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Administrador{nombre=").append(nombre);
+        sb.append("Administrador {nombre=").append(nombre);
         sb.append(", contrasena=").append(contrasena);
         sb.append(", correo=").append(correo);
         sb.append(", permisos=").append(permisos);

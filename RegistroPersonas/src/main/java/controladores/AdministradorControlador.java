@@ -48,12 +48,15 @@ public class AdministradorControlador implements Controlador {
                         
                         String[] permisos = rs.getString("permisos").split("\\,");
                         admin.setPermisos(Arrays.asList(permisos));
-                        System.out.println(admin.getPermisos() + " " + admin.getNombre());
 
                         if (!this.getLista_admins().contains(admin)) {
                             this.getLista_admins().add(admin);
                         }
                     }
+                    
+                    this.getLista_admins().forEach(a -> {
+                        System.out.println(a.toString());
+                    });
                 }
             }
         } catch (SQLException ex) {
