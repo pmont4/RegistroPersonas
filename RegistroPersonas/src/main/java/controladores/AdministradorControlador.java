@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,13 +24,6 @@ public class AdministradorControlador implements Controlador {
 
     private Connection getConn() throws Exception {
         return App.getMySQL() == null ? null : App.getMySQL().getConnection();
-    }
-
-    private Statement update(String ins) throws Exception {
-        try (Statement stmt = this.getConn().createStatement()) {
-            stmt.executeUpdate(ins);
-            return stmt;
-        }
     }
 
     public AdministradorControlador() throws Exception {
