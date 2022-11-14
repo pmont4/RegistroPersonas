@@ -1,2 +1,2 @@
 # RegistroPersonas
-Pruebas de libreria JFrame y MySQL usando Java para Desktop
+Pruebas de libreria JFrame y MySQL (Hikari como metodo de conexión) usando Java para Desktop
