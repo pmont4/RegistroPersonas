@@ -15,7 +15,6 @@ import objetos.Administrador;
 * Clase hecha para evitar tantas consultas
 * A la base de datos MySQL
  */
-
 public class AdministradorControlador implements Controlador {
 
     private List<Administrador> lista_administradores;
@@ -27,7 +26,7 @@ public class AdministradorControlador implements Controlador {
     private Connection getConn() throws Exception {
         return App.getMySQL() == null ? null : App.getMySQL().getConnection();
     }
-    
+
     private Statement update(String ins) throws Exception {
         try (Statement stmt = this.getConn().createStatement()) {
             stmt.executeUpdate(ins);
@@ -46,7 +45,7 @@ public class AdministradorControlador implements Controlador {
                         admin.setNombre(rs.getString("nombre"));
                         admin.setContrasena(rs.getString("contrasena"));
                         admin.setCorreo(rs.getString("correo"));
-                        
+
                         if (rs.getString("permisos").contains(",")) {
                             String[] permisos = rs.getString("permisos").split("\\,");
                             admin.setPermisos(Arrays.asList(permisos));
@@ -62,7 +61,7 @@ public class AdministradorControlador implements Controlador {
                             this.getLista_admins().add(admin);
                         }
                     }
-                    
+
                     this.getLista_admins().forEach(a -> {
                         System.out.println(a.toString());
                     });
@@ -94,7 +93,7 @@ public class AdministradorControlador implements Controlador {
         admin.setNombre(propiedades[0]);
         admin.setContrasena(propiedades[1]);
         admin.setCorreo(propiedades[2]);
-        
+
         if (propiedades[3].contains(",")) {
             String[] permisos = propiedades[3].split("\\,");
             admin.setPermisos(Arrays.asList(permisos));
@@ -105,8 +104,7 @@ public class AdministradorControlador implements Controlador {
                 throw new NullPointerException();
             }
         }
-        
-        
+
         try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM admins WHERE nombre=?")) {
             stmt.setString(1, admin.getNombre());
             try (ResultSet rs = stmt.executeQuery()) {
@@ -121,7 +119,7 @@ public class AdministradorControlador implements Controlador {
                 }
             }
         }
-        
+
         if (!(this.existsEntidad(admin.getCorreo()))) {
             this.getLista_admins().add(admin);
         }
@@ -137,6 +135,18 @@ public class AdministradorControlador implements Controlador {
                     admin.setNombre(rs.getString("nombre"));
                     admin.setContrasena(rs.getString("contrasena"));
                     admin.setCorreo(rs.getString("correo"));
+
+                    if (rs.getString("permisos").contains(",")) {
+                        String[] permisos = rs.getString("permisos").split("\\,");
+                        admin.setPermisos(Arrays.asList(permisos));
+                    } else {
+                        if (rs.getString("permisos").equals("agregar") || rs.getString("permisos").equals("modificar") || rs.getString("permisos").equals("borrar")) {
+                            admin.setPermisos(Arrays.asList(rs.getString("permisos")));
+                        } else {
+                            throw new NullPointerException();
+                        }
+                    }
+
                     return admin;
                 }
             }
@@ -150,7 +160,7 @@ public class AdministradorControlador implements Controlador {
             stmt.setString(1, propiedad);
             stmt.executeUpdate();
         }
-        
+
         Administrador admin = (Administrador) this.getEntidad(propiedad);
         if (this.existsEntidad(propiedad)) {
             this.getLista_admins().remove(admin);
