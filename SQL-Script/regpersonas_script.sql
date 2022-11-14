@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS personas;
 INSERT INTO regpersonas.admins(nombre, contrasena, correo, permisos) VALUE ('Paulo', 'monterroso', 'paulo@gmail.com', 'agregar,borrar,modificar');
 
 TRUNCATE TABLE admins;
+TRUNCATE TABLE personas;
 
 SELECT * FROM admins WHERE nombre = Paulo;
 
