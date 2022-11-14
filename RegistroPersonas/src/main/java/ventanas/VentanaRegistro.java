@@ -9,6 +9,7 @@ public class VentanaRegistro extends javax.swing.JFrame {
 
     public VentanaRegistro() {
         initComponents();
+        this.setLocationRelativeTo(null);
         this.setResizable(false);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("Registro de personas");

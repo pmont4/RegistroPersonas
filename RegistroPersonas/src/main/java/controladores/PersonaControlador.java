@@ -1,9 +1,9 @@
 package controladores;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.lang.model.SourceVersion;
@@ -26,20 +26,13 @@ public class PersonaControlador implements Controlador {
     private Connection getConn() throws Exception {
         return App.getMySQL() == null ? null : App.getMySQL().getConnection();
     }
-    
-    private Statement execute(String ins) throws Exception {
-        try (Statement stmt = this.getConn().createStatement()) {
-            stmt.execute(ins);
-            return stmt;
-        }
-    }
 
     public PersonaControlador() throws Exception {
         lista_personas = new ArrayList<>();
 
         try {
-            try (Statement stmt = this.getConn().createStatement()) {
-                try (ResultSet rs = stmt.executeQuery("SELECT * FROM personas")) {
+            try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM personas")) {
+                try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         Persona persona = new Persona();
                         persona.setId(rs.getInt("id"));
@@ -72,14 +65,18 @@ public class PersonaControlador implements Controlador {
         persona.setAltura(propiedades[3]);
         persona.setGenero(propiedades[4].charAt(0));
         
-        try (Statement stmt = this.getConn().createStatement()) {
-            try (ResultSet rs = stmt.executeQuery("SELECT * FROM personas WHERE id = " + persona.getId())) {
+        try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM personas WHERE nombre=?")) {
+            stmt.setString(1, persona.getNombre());
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (!(rs.next())) {
-                    this.execute("INSERT INTO personas (id, nombre, edad, altura, genero) VALUES (0, "
-                                + "'" + persona.getNombre() + "', "
-                                + persona.getEdad() + ", "
-                                + "'" + persona.getAltura() + "', "
-                                + "'" + persona.getGenero() + "')");
+                    try (PreparedStatement stmt2 = this.getConn().prepareStatement("INSERT INTO personas(id, nombre, edad, altura, genero) VALUES (?,?,?,?,?)")) {
+                        stmt2.setInt(1, 0);
+                        stmt2.setString(2, persona.getNombre());
+                        stmt2.setInt(3, persona.getEdad());
+                        stmt2.setString(4, persona.getAltura());
+                        stmt2.setString(5, persona.getGenero().toString());
+                        stmt2.executeUpdate();
+                    }
                 }
             }
         }
@@ -91,8 +88,9 @@ public class PersonaControlador implements Controlador {
 
     @Override
     public Object getEntidad(String propiedad) throws Exception {
-        try (Statement stmt = this.getConn().createStatement()) {
-            try (ResultSet rs = stmt.executeQuery("SELECT * FROM personas WHERE id = " + Integer.parseInt(propiedad))) {
+        try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM personas WHERE id=?")) {
+            stmt.setInt(1, Integer.parseInt(propiedad));
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()){
                     Persona persona = new Persona();
                     persona.setId(rs.getInt("id"));
@@ -109,7 +107,10 @@ public class PersonaControlador implements Controlador {
 
     @Override
     public void deleteEntidad(String propiedad) throws Exception {
-        this.execute("DELETE FROM personas WHERE id = " + Integer.parseInt(propiedad));
+        try (PreparedStatement stmt = this.getConn().prepareStatement("DELETE FROM personas WHERE id=?")) {
+            stmt.setInt(1, Integer.parseInt(propiedad));
+            stmt.executeUpdate();
+        }
         
         Persona persona = (Persona) this.getEntidad(propiedad);
         if (this.existsEntidad(propiedad)) {
@@ -119,8 +120,9 @@ public class PersonaControlador implements Controlador {
 
     @Override
     public boolean existsEntidad(String propiedad) throws Exception {
-        try (Statement stmt = this.getConn().createStatement()) {
-            try (ResultSet rs = stmt.executeQuery("SELECT * FROM personas WHERE id = " + Integer.parseInt(propiedad))) {
+        try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM personas WHERE id=?")) {
+            stmt.setInt(1, Integer.parseInt(propiedad));
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     Persona persona = new Persona();
                     persona.setId(rs.getInt("id"));

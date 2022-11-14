@@ -9,6 +9,7 @@ public class VentanaBorrar extends javax.swing.JFrame {
 
     public VentanaBorrar() {
         initComponents();
+        this.setLocationRelativeTo(null);
         this.setResizable(false);
         this.setTitle("Eliminar");
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

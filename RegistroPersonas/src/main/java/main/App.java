@@ -4,10 +4,12 @@ import conector.MySQLConector;
 import controladores.AdministradorControlador;
 import controladores.Controlador;
 import controladores.PersonaControlador;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import objetos.Administrador;
 import ventanas.VentanaBorrar;
+import ventanas.VentanaLogIn;
 import ventanas.VentanaPrincipal;
 import ventanas.VentanaRegistro;
 
@@ -16,6 +18,11 @@ public class App {
     private static MySQLConector mySQL;
     public static MySQLConector getMySQL() throws Exception {
         return mySQL == null ? null : mySQL;
+    }
+    
+    private static VentanaLogIn ventanaLogIn;
+    public static VentanaLogIn getVentanaLogIn() {
+        return ventanaLogIn == null ? null : ventanaLogIn;
     }
     
     private static VentanaRegistro ventanaRegistro;
@@ -43,19 +50,34 @@ public class App {
         return adminControlador == null ? null : adminControlador;
     }
     
+    private static void initVentanas() throws Exception {
+        ventanaLogIn = new VentanaLogIn();
+        ventanaPrincipal = new VentanaPrincipal();    
+        ventanaRegistro = new VentanaRegistro();
+        ventanaBorrar = new VentanaBorrar();
+        
+        getVentanaLogIn().setVisible(true);
+    }
+    
+    private static void initControladores() throws Exception {
+        personaControlador = new PersonaControlador();
+        adminControlador = new AdministradorControlador();
+    }
+    
     public static void main(String[] args) {
         try {
-            mySQL = new MySQLConector("paulo", "D]j!XzMvI*ostEd4", "localhost", 3306, "regpersonas");
-            getMySQL().conectar();
+            mySQL = new MySQLConector();
+            mySQL.setDatabase("regpersonas");
+            mySQL.setUser("paulo");
+            mySQL.setHost("localhost");
+            mySQL.setPassword("D]j!XzMvI*ostEd4");
+            mySQL.setPort(3306);
+            mySQL.setSSL("false");
+            mySQL.configure();
+            mySQL.connect();
             
-            personaControlador = new PersonaControlador();
-            adminControlador = new AdministradorControlador();
-            
-            ventanaPrincipal = new VentanaPrincipal();
-            getVentanaPrincipal().setVisible(true);
-            
-            ventanaRegistro = new VentanaRegistro();
-            ventanaBorrar = new VentanaBorrar();
+            initControladores();
+            initVentanas();
         } catch (Exception ex) {
             System.out.println("Un error ha ocurrido >> " + ex.getMessage());
         }
@@ -63,16 +85,8 @@ public class App {
     
     private static Administrador adminOnline;
     
-    public static void setAdminOnline(Administrador admin) throws Exception {
-        try (Statement stmt = getMySQL().getConnection().createStatement()) {
-            try (ResultSet rs = stmt.executeQuery("SELECT * FROM admins WHERE correo = " + admin.getCorreo())) {
-                if (rs.next()) {
-                    adminOnline = admin;
-                } else {
-                    adminOnline = null;
-                }
-            }
-        }
+    public static void setAdminOnline(Administrador admin) {
+        adminOnline = admin;
     }
     
     public static Administrador getAdminOnline() {

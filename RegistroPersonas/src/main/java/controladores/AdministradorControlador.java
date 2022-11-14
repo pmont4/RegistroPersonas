@@ -1,6 +1,7 @@
 package controladores;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,10 +27,10 @@ public class AdministradorControlador implements Controlador {
     private Connection getConn() throws Exception {
         return App.getMySQL() == null ? null : App.getMySQL().getConnection();
     }
-
-    private Statement execute(String ins) throws Exception {
+    
+    private Statement update(String ins) throws Exception {
         try (Statement stmt = this.getConn().createStatement()) {
-            stmt.execute(ins);
+            stmt.executeUpdate(ins);
             return stmt;
         }
     }
@@ -38,16 +39,24 @@ public class AdministradorControlador implements Controlador {
         lista_administradores = new ArrayList<>();
 
         try {
-            try (Statement stmt = this.getConn().createStatement()) {
-                try (ResultSet rs = stmt.executeQuery("SELECT * FROM admins")) {
+            try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM admins")) {
+                try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         Administrador admin = new Administrador();
                         admin.setNombre(rs.getString("nombre"));
                         admin.setContrasena(rs.getString("contrasena"));
                         admin.setCorreo(rs.getString("correo"));
                         
-                        String[] permisos = rs.getString("permisos").split("\\,");
-                        admin.setPermisos(Arrays.asList(permisos));
+                        if (rs.getString("permisos").contains(",")) {
+                            String[] permisos = rs.getString("permisos").split("\\,");
+                            admin.setPermisos(Arrays.asList(permisos));
+                        } else {
+                            if (rs.getString("permisos").equals("agregar") || rs.getString("permisos").equals("modificar") || rs.getString("permisos").equals("borrar")) {
+                                admin.setPermisos(Arrays.asList(rs.getString("permisos")));
+                            } else {
+                                throw new NullPointerException();
+                            }
+                        }
 
                         if (!this.getLista_admins().contains(admin)) {
                             this.getLista_admins().add(admin);
@@ -67,8 +76,9 @@ public class AdministradorControlador implements Controlador {
     @Override
     public boolean existsEntidad(String propiedad) throws Exception {
         try {
-            try (Statement stmt = this.getConn().createStatement()) {
-                try (ResultSet rs = stmt.executeQuery("SELECT * FROM admin WHERE correo = " + propiedad)) {
+            try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM admin WHERE nombre=?")) {
+                stmt.setString(1, propiedad);
+                try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         Administrador admin = new Administrador();
                         admin.setNombre(rs.getString("nombre"));
@@ -91,13 +101,29 @@ public class AdministradorControlador implements Controlador {
         admin.setContrasena(propiedades[1]);
         admin.setCorreo(propiedades[2]);
         
-        try (Statement stmt = this.getConn().createStatement()) {
-            try (ResultSet rs = stmt.executeQuery("SELECT * FROM admins WHERE correo = " + admin.getCorreo())) {
+        if (propiedades[3].contains(",")) {
+            String[] permisos = propiedades[3].split("\\,");
+            admin.setPermisos(Arrays.asList(permisos));
+        } else {
+            if (propiedades[3].equals("agregar") || propiedades[3].equals("modificar") || propiedades[3].equals("borrar")) {
+                admin.setPermisos(Arrays.asList(propiedades[3]));
+            } else {
+                throw new NullPointerException();
+            }
+        }
+        
+        
+        try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM admins WHERE nombre=?")) {
+            stmt.setString(1, admin.getNombre());
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (!(rs.next())) {
-                    this.execute("INSERT INTO admins (nombre, contrasena, correo) VALUES ('"
-                                    + admin.getNombre() + "', "
-                                    + "SHA1('" + admin.getContrasena() + "'), "
-                                    + "'" + admin.getCorreo() + "')");
+                    try (PreparedStatement stmt2 = this.getConn().prepareStatement("INSERT INTO admins(nombre, contrasena, correo, permisos) VALUES (?,?,?,?)")) {
+                        stmt2.setString(1, admin.getNombre());
+                        stmt2.setString(2, admin.getContrasena());
+                        stmt2.setString(3, admin.getCorreo());
+                        stmt2.setString(4, propiedades[3]);
+                        stmt2.executeUpdate();
+                    }
                 }
             }
         }
@@ -109,8 +135,9 @@ public class AdministradorControlador implements Controlador {
 
     @Override
     public Object getEntidad(String propiedad) throws Exception {
-        try (Statement stmt = this.getConn().createStatement()) {
-            try (ResultSet rs = stmt.executeQuery("SELECT * FROM admins WHERE correo = " + propiedad)) {
+        try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM admins WHERE nombre=?")) {
+            stmt.setString(1, propiedad);
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     Administrador admin = new Administrador();
                     admin.setNombre(rs.getString("nombre"));
@@ -125,24 +152,14 @@ public class AdministradorControlador implements Controlador {
 
     @Override
     public void deleteEntidad(String propiedad) throws Exception {
-        this.execute("DELETE FROM admins WHERE correo = " + propiedad);
+        try (PreparedStatement stmt = this.getConn().prepareStatement("DELETE FROM admins WHERE nombre=?")) {
+            stmt.setString(1, propiedad);
+            stmt.executeUpdate();
+        }
         
         Administrador admin = (Administrador) this.getEntidad(propiedad);
         if (this.existsEntidad(propiedad)) {
             this.getLista_admins().remove(admin);
         }
-    }
-
-    public boolean comprobar_contrasena(String correo, String contrasena) throws Exception {
-        try {
-            try (Statement stmt = this.getConn().createStatement()) {
-                try (ResultSet rs = stmt.executeQuery("SELECT * FROM admin WHERE correo = " + correo + " AND contrasena = SHA1(" + contrasena + ")")) {
-                    return rs.next();
-                }
-            }
-        } catch (SQLException ex) {
-            System.out.println("Un error ha ocurrido >> " + ex.getClass().getName() + " ERROR: " + ex.getMessage());
-        }
-        return false;
     }
 }
