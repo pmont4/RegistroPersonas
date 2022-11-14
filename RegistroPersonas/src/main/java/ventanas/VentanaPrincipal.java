@@ -65,6 +65,15 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         this.tableDatos.setModel(this.tableModel);
     }
     
+    public void limpiar_tabla() {
+        DefaultTableModel modelo = (DefaultTableModel) this.tableModel;
+        int rowCount = modelo.getRowCount();
+        
+        for (int i = rowCount - 1; i >= 0; i--) {
+            modelo.removeRow(i);
+        }
+    }
+    
     public void actualizar_texto_admin() {
         if (App.getAdminOnline() != null) {
             labelBienvenida.setText("Bienvenido/a, " + App.getAdminOnline().getNombre());

@@ -247,11 +247,17 @@ public class VentanaRegistro extends javax.swing.JFrame {
                 if (!txtfieldAltura.getText().isEmpty()) {
                     if (alturaAceptada) {
                         App.getPersonaControlador().addEntidad(propiedades);
-
+                        
+                        App.getVentanaPrincipal().limpiar_tabla();
+                        App.getVentanaPrincipal().llenar_tabla();
+                        
                         JOptionPane.showMessageDialog(null, persona.getNombre() + " fue correctamente registrado/a", "Registro", JOptionPane.INFORMATION_MESSAGE);
                     }
                 } else {
                     App.getPersonaControlador().addEntidad(propiedades);
+                    
+                    App.getVentanaPrincipal().limpiar_tabla();
+                    App.getVentanaPrincipal().llenar_tabla();
 
                     JOptionPane.showMessageDialog(null, persona.getNombre() + " fue correctamente registrado/a", "Registro", JOptionPane.INFORMATION_MESSAGE);
                 }

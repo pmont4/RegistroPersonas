@@ -123,17 +123,8 @@ public class PersonaControlador implements Controlador {
         try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM personas WHERE id=?")) {
             stmt.setInt(1, Integer.parseInt(propiedad));
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    Persona persona = new Persona();
-                    persona.setId(rs.getInt("id"));
-                    persona.setNombre(rs.getString("nombre"));
-                    persona.setEdad(rs.getInt("edad"));
-                    persona.setAltura(rs.getString("altura"));
-                    persona.setGenero(rs.getString("genero").charAt(0));
-                    return this.getLista_personas().contains(persona);
-                }
+                return rs.next();
             }
         }
-        return false;
     }
 }

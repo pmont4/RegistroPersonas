@@ -79,13 +79,7 @@ public class AdministradorControlador implements Controlador {
             try (PreparedStatement stmt = this.getConn().prepareStatement("SELECT * FROM admin WHERE nombre=?")) {
                 stmt.setString(1, propiedad);
                 try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        Administrador admin = new Administrador();
-                        admin.setNombre(rs.getString("nombre"));
-                        admin.setCorreo(rs.getString("correo"));
-                        admin.setContrasena(rs.getString("contrasena"));
-                        return this.getLista_admins().contains(admin);
-                    }
+                    return rs.next();
                 }
             }
         } catch (SQLException ex) {
