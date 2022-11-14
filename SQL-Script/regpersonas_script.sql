@@ -10,7 +10,7 @@ INSERT INTO regpersonas.admins(nombre, contrasena, correo, permisos) VALUE ('Pau
 TRUNCATE TABLE admins;
 TRUNCATE TABLE personas;
 
-SELECT * FROM admins WHERE nombre = Paulo;
+SELECT * FROM admins WHERE correo = 'paulo@gmail.com';
 
 UPDATE admins SET permisos='agregar,borrar' WHERE correo = 'paulo@gmail.com';
 
