@@ -151,6 +151,14 @@ public class VentanaLogIn extends javax.swing.JFrame {
                                         } else {
                                             admin.setUltima_sesion(now);
                                             admin.setNumero_registros(rs2.getInt("cantidad_registros"));
+                                            
+                                            String registro = rs2.getString("registro");
+                                            if (registro.contains(",")) {
+                                                String[] split = registro.split("\\,");
+                                                admin.setLista_registro(Arrays.asList(split));                                
+                                            } else {
+                                                admin.setLista_registro(Arrays.asList(registro));
+                                            }
                                         }
                                     }
                                 }

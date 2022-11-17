@@ -1,7 +1,5 @@
 package objetos;
 
-import java.util.Objects;
-
 public class Persona {
     
     private Integer id;
