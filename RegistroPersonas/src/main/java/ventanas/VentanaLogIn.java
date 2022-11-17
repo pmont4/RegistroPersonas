@@ -3,8 +3,11 @@ package ventanas;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import main.App;
@@ -131,6 +134,26 @@ public class VentanaLogIn extends javax.swing.JFrame {
                                 }
 
                                 App.setAdminOnline(admin);
+                                
+                                try (PreparedStatement stmt2 = App.getMySQL().getConnection().prepareStatement("SELECT * FROM " + admin.getNombre() + "_log WHERE fecha=?")) {
+                                    DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                    LocalDateTime now = LocalDateTime.now();
+                                    stmt2.setString(1, format.format(now));
+                                    try (ResultSet rs2 = stmt2.executeQuery()) {
+                                        if (!rs2.next()) {
+                                            admin.setUltima_sesion(now);
+                                            PreparedStatement stmt3 = App.getMySQL().getConnection().prepareStatement("INSERT INTO " + admin.getNombre() + "_log (fecha, registro, cantidad_registros) VALUES (?,?,?)");
+                                            stmt3.setString(1, new String(format.format(now)));
+                                            stmt3.setString(2, "");
+                                            stmt3.setInt(3, 0);
+                                            stmt3.executeUpdate();
+                                            stmt3.close();
+                                        } else {
+                                            admin.setUltima_sesion(now);
+                                            admin.setNumero_registros(rs2.getInt("cantidad_registros"));
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -147,6 +170,11 @@ public class VentanaLogIn extends javax.swing.JFrame {
                 }
             } catch (Exception ex) {
                 System.out.println("Un error ha ocurrido >> " + ex.getClass().getName() + " ERROR: " + ex.getMessage());
+                try {
+                    App.getMySQL().getConnection().rollback();
+                } catch (Exception ex1) {
+                    Logger.getLogger(VentanaLogIn.class.getName()).log(Level.SEVERE, null, ex1);
+                }
             }
         }
     }//GEN-LAST:event_btnIngresarActionPerformed

@@ -1,5 +1,11 @@
 package ventanas;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import main.App;
@@ -87,11 +93,51 @@ public class VentanaBorrar extends javax.swing.JFrame {
                 Persona persona = (Persona) App.getPersonaControlador().getEntidad(fieldIngresar.getText());
                 if (App.getPersonaControlador().existsEntidad(persona.getId().toString())) {
                     App.getPersonaControlador().deleteEntidad(persona.getId().toString());
-                    
+
                     App.getVentanaPrincipal().limpiar_tabla();
                     App.getVentanaPrincipal().llenar_tabla();
-                    
+
                     JOptionPane.showMessageDialog(null, persona.getNombre() + " fue correctamente eliminado/a de la base de datos", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
+
+                    if (App.getAdminOnline() != null) {
+                        String last_registro = "";
+                        Integer numero_registros = 0;
+                        StringBuilder nuevo_registro = new StringBuilder();
+                        try (PreparedStatement stmt = App.getMySQL().getConnection().prepareStatement("SELECT * FROM " + App.getAdminOnline().getNombre() + "_log WHERE fecha=?")) {
+                            DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                            LocalDateTime now = LocalDateTime.now();
+                            stmt.setString(1, format.format(now));
+                            try (ResultSet rs = stmt.executeQuery()) {
+                                if (rs.next()) {
+                                    if (!rs.getString("registro").equals("")) {
+                                        last_registro = rs.getString("registro") + ", ";
+                                    }
+                                    numero_registros = rs.getInt("cantidad_registros");
+                                    try (PreparedStatement stmt2 = App.getMySQL().getConnection().prepareStatement("UPDATE " + App.getAdminOnline().getNombre() + "_log SET registro=?, cantidad_registros=? WHERE fecha=?")) {
+                                        nuevo_registro.append(last_registro).append("Se elimino a ").append(persona.getNombre()).append(" de la base de datos");
+                                        stmt2.setString(1, nuevo_registro.toString());
+                                        stmt2.setInt(2, numero_registros + 1);
+                                        stmt2.setString(3, format.format(now));
+                                        stmt2.executeUpdate();
+                                    }
+
+                                    App.getAdminOnline().setNumero_registros(numero_registros);
+                                    String texto = new String(nuevo_registro);
+                                    if (texto.contains(",")) {
+                                        String[] split = texto.split("\\,");
+                                        App.getAdminOnline().setLista_registro(Arrays.asList(split));
+                                    } else {
+                                        App.getAdminOnline().setLista_registro(Arrays.asList(texto));
+                                    }
+
+                                    System.out.println("Registros de " + App.getAdminOnline().getNombre() + ": ");
+                                    App.getAdminOnline().getLista_registro().forEach(t -> {
+                                        System.out.println(t.trim());
+                                    });
+                                }
+                            }
+                        }
+                    }
                 } else {
                     JOptionPane.showMessageDialog(null, "El ID '" + persona.getId().toString() + "' no fue encontrado", "No encontrado", JOptionPane.WARNING_MESSAGE);
                 }

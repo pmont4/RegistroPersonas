@@ -56,12 +56,52 @@ public class AdministradorControlador implements Controlador {
 
                     this.getLista_admins().forEach(a -> {
                         System.out.println(a.toString());
+                        try {
+                            if (this.existe_tabla(a.getNombre() + "_log")) {
+                                try (PreparedStatement stmt3 = this.getConn().prepareStatement("SELECT * FROM " + a.getNombre() + "_log")) {
+                                    try (ResultSet rs2 = stmt3.executeQuery()) {
+                                        while (rs2.next()) {
+                                            a.setNumero_registros(rs2.getInt("cantidad_registros"));
+                                            String registro = rs2.getString("registro");
+                                            if (registro.contains(",")) {
+                                                String[] split = registro.split("\\,");
+                                                a.setLista_registro(Arrays.asList(split));                                
+                                            } else {
+                                                a.setLista_registro(Arrays.asList(registro));
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                try (PreparedStatement stmt2 = this.getConn().prepareStatement("CREATE TABLE IF NOT EXISTS " + a.getNombre() + "_log (fecha VARCHAR(70), registro LONGTEXT, cantidad_registros INT)")) {
+                                    stmt2.executeUpdate();
+                                } catch (Exception ex) {
+                                    System.out.println("Un error ha ocurrido >> " + ex.getMessage());
+                                }
+                            }
+                        } catch (Exception ex) {
+                            System.out.println("Un error ha ocurrido >> " + ex.getMessage());
+                        }
                     });
                 }
             }
         } catch (SQLException ex) {
             System.out.println("Un error ha ocurrido >> " + ex.getMessage());
         }
+    }
+
+    private boolean existe_tabla(String nombre_tabla) throws Exception {
+        boolean exists = false;
+        try (ResultSet rs = this.getConn().getMetaData().getTables(null, null, nombre_tabla, null)) {
+            while (rs.next()) {
+                String nombre = rs.getString("TABLE_NAME");
+                if (nombre != null && nombre.equals(nombre_tabla.toLowerCase())) {
+                    exists = true;
+                    break;
+                }
+            }
+        }
+        return exists;
     }
 
     @Override

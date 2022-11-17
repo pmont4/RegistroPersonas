@@ -16,3 +16,7 @@ UPDATE admins SET permisos='agregar,borrar' WHERE correo = 'paulo@gmail.com';
 
 SELECT * FROM personas;
 SELECT * FROM admins;
+
+TRUNCATE paulo_log;
+
+SHOW TABLES LIKE 'personas';
