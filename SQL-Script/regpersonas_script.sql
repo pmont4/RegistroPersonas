@@ -19,4 +19,6 @@ SELECT * FROM admins;
 
 TRUNCATE paulo_log;
 
+SELECT * FROM paulo_log;
+
 SHOW TABLES LIKE 'personas';
