@@ -95,6 +95,7 @@ public class VentanaBorrar extends javax.swing.JFrame {
 
                     App.getVentanaPrincipal().limpiar_tabla();
                     App.getVentanaPrincipal().llenar_tabla();
+                    App.getVentanaPrincipal().actualizar_numero_personas();
 
                     JOptionPane.showMessageDialog(null, persona.getNombre() + " fue correctamente eliminado/a de la base de datos", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
 

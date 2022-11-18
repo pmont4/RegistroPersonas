@@ -4,10 +4,13 @@ import conector.MySQLConector;
 import controladores.AdministradorControlador;
 import controladores.Controlador;
 import controladores.PersonaControlador;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import objetos.Administrador;
 import ventanas.VentanaBorrar;
 import ventanas.VentanaLogIn;
 import ventanas.VentanaPrincipal;
+import ventanas.VentanaRegistrarAdmin;
 import ventanas.VentanaRegistro;
 
 public class App {
@@ -53,7 +56,16 @@ public class App {
         ventanaRegistro = new VentanaRegistro();
         ventanaBorrar = new VentanaBorrar();
         
-        getVentanaLogIn().setVisible(true);
+        try (PreparedStatement stmt = getMySQL().getConnection().prepareStatement("SELECT * FROM admins")) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    getVentanaLogIn().setVisible(true);
+                } else {
+                    VentanaRegistrarAdmin admin = new VentanaRegistrarAdmin();
+                    admin.setVisible(true);
+                }
+            }
+        }
     }
     
     private static void initControladores() throws Exception {

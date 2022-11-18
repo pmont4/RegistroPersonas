@@ -145,7 +145,13 @@ public class AdministradorControlador implements Controlador {
                         stmt2.setString(1, admin.getNombre());
                         stmt2.setString(2, admin.getContrasena());
                         stmt2.setString(3, admin.getCorreo());
-                        stmt2.setString(4, propiedades[3]);
+                        String permisos = propiedades[3];
+                        if (permisos.charAt(permisos.length() - 1) == ',') {
+                            String nueva_cadena = permisos.substring(0, permisos.length() - 1);
+                            stmt2.setString(4, nueva_cadena);
+                        } else {
+                            stmt2.setString(4, propiedades[3]);
+                        }
                         stmt2.executeUpdate();
                     }
                 }

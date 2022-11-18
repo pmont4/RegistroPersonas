@@ -257,6 +257,7 @@ public class VentanaRegistro extends javax.swing.JFrame {
 
                         App.getVentanaPrincipal().limpiar_tabla();
                         App.getVentanaPrincipal().llenar_tabla();
+                        App.getVentanaPrincipal().actualizar_numero_personas();
 
                         JOptionPane.showMessageDialog(null, persona.getNombre() + " fue correctamente registrado/a", "Registro", JOptionPane.INFORMATION_MESSAGE);
                     }
@@ -265,6 +266,7 @@ public class VentanaRegistro extends javax.swing.JFrame {
 
                     App.getVentanaPrincipal().limpiar_tabla();
                     App.getVentanaPrincipal().llenar_tabla();
+                    App.getVentanaPrincipal().actualizar_numero_personas();
 
                     JOptionPane.showMessageDialog(null, persona.getNombre() + " fue correctamente registrado/a", "Registro", JOptionPane.INFORMATION_MESSAGE);
                 }

@@ -21,4 +21,6 @@ TRUNCATE paulo_log;
 
 SELECT * FROM paulo_log;
 
+DROP TABLE paulo_log;
+
 SHOW TABLES LIKE 'personas';
