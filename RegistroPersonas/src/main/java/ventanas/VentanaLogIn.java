@@ -44,6 +44,8 @@ public class VentanaLogIn extends javax.swing.JFrame {
 
         fieldNombre.setToolTipText("Nombre");
 
+        fieldContrasena.setToolTipText("Contraseña");
+
         jLabel2.setText("Nombre:");
 
         jLabel3.setText("Contraseña");
