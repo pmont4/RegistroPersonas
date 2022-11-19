@@ -89,16 +89,12 @@ public class App {
     public static VentanaDatosMySQL config;
 
     public static void main(String[] args) throws IOException {
-
-        System.out.println(System.getProperty("user.name"));
-
         try {
             boolean directorio_disponible = false;
 
             directorio_config = new File("C:\\Users\\" + System.getProperty("user.name") + "\\regpersonas");
             if (!(directorio_config.exists())) {
                 if (directorio_config.mkdirs()) {
-                    System.out.println("Directorio correctamente hecho");
                     directorio_disponible = true;
                 }
             } else {
