@@ -97,7 +97,7 @@ public class VentanaDatosMySQL extends javax.swing.JFrame {
         jLabel6.setText("Puerto:");
 
         fieldPuerto.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
-        fieldPuerto.setToolTipText("Si se deja en blanco, su valor sera 3306");
+        fieldPuerto.setToolTipText("Valor por defecto: 3306 (DEBE INGRESARSE)");
 
         jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
         jLabel7.setText("SSL:");
@@ -227,11 +227,7 @@ public class VentanaDatosMySQL extends javax.swing.JFrame {
                     linea_conexion.append("host:localhost,");
                 }
 
-                if (!(fieldPuerto.getText().isEmpty())) {
-                    linea_conexion.append("port:").append(fieldPuerto.getText()).append(",");
-                } else {
-                    linea_conexion.append("port:3306,");
-                }
+                linea_conexion.append("port:").append(fieldPuerto.getText()).append(",");
 
                 if (checkBoxSSL.isSelected()) {
                     linea_conexion.append("ssl:true");
@@ -265,7 +261,12 @@ public class VentanaDatosMySQL extends javax.swing.JFrame {
                                 }
                                 this.dispose();
                             } catch (Exception ex) {
-                                Logger.getLogger(VentanaDatosMySQL.class.getName()).log(Level.SEVERE, null, ex);
+                                this.fieldUsuario.setText("");
+                                this.fieldBaseDatos.setText("");
+                                this.fieldContrasena.setText("");
+                                this.fieldPuerto.setText("");
+                                this.fieldHost.setText("");
+                                JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                             }
                         }
                     }
@@ -294,6 +295,11 @@ public class VentanaDatosMySQL extends javax.swing.JFrame {
                             }
                             this.dispose();
                         } catch (Exception ex) {
+                            this.fieldUsuario.setText("");
+                            this.fieldBaseDatos.setText("");
+                            this.fieldContrasena.setText("");
+                            this.fieldPuerto.setText("");
+                            this.fieldHost.setText("");
                             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
