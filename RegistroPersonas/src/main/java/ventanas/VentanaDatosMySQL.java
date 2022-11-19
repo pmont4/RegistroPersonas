@@ -289,12 +289,12 @@ public class VentanaDatosMySQL extends javax.swing.JFrame {
                             mySQL.connect();
 
                             if (mySQL.checkConnection()) {
-                                JOptionPane.showMessageDialog(null, "La configuracion de la base datos fue correctamente guardada y se comprobo la conexion, se reiniciara el programa", "Configuracion", JOptionPane.INFORMATION_MESSAGE);
                                 this.labelConexion.setText("Estado conexión: CONECTADO");
+                                JOptionPane.showMessageDialog(null, "La configuracion de la base datos fue correctamente guardada y se comprobo la conexion, se reiniciara el programa", "Configuracion", JOptionPane.INFORMATION_MESSAGE);
                             }
                             this.dispose();
                         } catch (Exception ex) {
-                            Logger.getLogger(VentanaDatosMySQL.class.getName()).log(Level.SEVERE, null, ex);
+                            JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 }

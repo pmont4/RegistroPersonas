@@ -111,8 +111,6 @@ public class App {
                     String linea = new String(Files.readAllBytes(Paths.get(archivo.getAbsolutePath())));
                     System.out.println(linea);
 
-                    boolean conexion;
-
                     String[] split = linea.split("\\,");
                     String usuario = "";
                     String contrasena = "";
