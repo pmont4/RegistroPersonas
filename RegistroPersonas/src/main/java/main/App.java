@@ -180,7 +180,7 @@ public class App {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            System.out.println("Un error ha ocurrdio: CLASE: Main METODO: CONSTRUCT- ERROR: " + ex.getMessage());
         }
     }
 
