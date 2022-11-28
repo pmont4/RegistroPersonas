@@ -1,5 +1,9 @@
 package json;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
@@ -20,17 +24,31 @@ public class JSON_Util {
 
     private File archivo_json;
 
-    public JSON_Util() {
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String date = format.format(now);
+    private File directorio_json;
 
-        this.archivo_json = new File(App.directorio_config.getAbsolutePath() + "\\session_admin_" + date + ".json");
-        if (!(this.archivo_json.exists())) {
-            try {
-                if (this.archivo_json.createNewFile());
-            } catch (IOException ex) {
-                System.out.println("Un error ha ocurrido: CLASE>" + this.getClass().getName() + " METODO: CONTRUCT_JSON" + " ERROR: " + ex.getMessage());
+    public JSON_Util() {
+        boolean directorio = false;
+        this.directorio_json = new File(App.directorio_config.getAbsolutePath() + "\\sessions_json");
+        if (!(directorio_json.exists())) {
+            if (directorio_json.mkdir()) {
+                directorio = true;
+            }
+        } else {
+            directorio = true;
+        }
+
+        if (directorio) {
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String date = format.format(now);
+
+            this.archivo_json = new File(directorio_json.getAbsolutePath() + "\\session_admin_" + date + ".json");
+            if (!(this.archivo_json.exists())) {
+                try {
+                    if (this.archivo_json.createNewFile());
+                } catch (IOException ex) {
+                    System.out.println("Un error ha ocurrido: CLASE>" + this.getClass().getName() + " METODO: CONTRUCT_JSON" + " ERROR: " + ex.getMessage());
+                }
             }
         }
     }
@@ -54,7 +72,9 @@ public class JSON_Util {
         objeto.put("permisos", permisos);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.getArchivo_json()))) {
-            writer.write(objeto.toJSONString());
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String enhanced = gson.toJson(objeto);
+            writer.write(enhanced);
             writer.flush();
         }
     }
@@ -95,7 +115,7 @@ public class JSON_Util {
                         });
                     }
                     admin.setPermisos(nueva_lista);
-                    
+
                     return admin;
                 } else {
                     return null;
