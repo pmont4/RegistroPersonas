@@ -66,7 +66,7 @@ public class JSON_Util {
         JSONArray permisos = new JSONArray();
         for (int i = 0; i < admin.getPermisos().size(); i++) {
             JSONObject obj = new JSONObject();
-            obj.put("permiso_" + i, admin.getPermisos().get(i));
+            obj.put("permiso_" + (i + 1), admin.getPermisos().get(i));
             permisos.add(obj);
         }
         objeto.put("permisos", permisos);
