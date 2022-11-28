@@ -136,6 +136,12 @@ public class VentanaLogIn extends javax.swing.JFrame {
                                 }
 
                                 App.setAdminOnline(admin);
+                                App.getJSON_Util().escribir_archivo(admin);
+                                
+                                if (App.getJSON_Util().getJSON_Admin() != null) {
+                                    String a = "JSON: " + App.getJSON_Util().getJSON_Admin().toString();
+                                    System.out.println(a);
+                                }
                                 
                                 try (PreparedStatement stmt2 = App.getMySQL().getConnection().prepareStatement("SELECT * FROM " + admin.getNombre() + "_log WHERE fecha=?")) {
                                     DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");

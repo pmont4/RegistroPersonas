@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import json.JSON_Util;
 import objetos.Administrador;
 import ventanas.VentanaBorrar;
 import ventanas.VentanaDatosMySQL;
@@ -61,6 +62,12 @@ public class App {
         return adminControlador == null ? null : adminControlador;
     }
 
+    private static JSON_Util json_util;
+
+    public static JSON_Util getJSON_Util() {
+        return json_util == null ? null : json_util;
+    }
+
     private static void initVentanas() throws Exception {
         ventanaLogIn = new VentanaLogIn();
         ventanaPrincipal = new VentanaPrincipal();
@@ -96,9 +103,11 @@ public class App {
             if (!(directorio_config.exists())) {
                 if (directorio_config.mkdirs()) {
                     directorio_disponible = true;
+                    json_util = new JSON_Util();
                 }
             } else {
                 directorio_disponible = true;
+                json_util = new JSON_Util();
             }
 
             if (directorio_disponible) {
