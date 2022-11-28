@@ -63,38 +63,47 @@ public class JSON_Util {
         JSONParser parse = new JSONParser();
         Administrador admin = new Administrador();
 
-        try (FileReader reader = new FileReader(this.getArchivo_json())) {
-            Object obj = parse.parse(reader);
-            JSONObject admin_obj = (JSONObject) obj;
+        if (this.getArchivo_json().length() != 0) {
+            try (FileReader reader = new FileReader(this.getArchivo_json())) {
+                Object obj = parse.parse(reader);
 
-            String nombre = String.valueOf(admin_obj.get("nombre"));
-            String contrasena = String.valueOf(admin_obj.get("contrasena"));
-            String correo = String.valueOf(admin_obj.get("correo"));
+                if (obj != null) {
+                    JSONObject admin_obj = (JSONObject) obj;
 
-            List<String> permisos = new ArrayList<>();
-            JSONArray permisos_obj = (JSONArray) admin_obj.get("permisos");
+                    String nombre = String.valueOf(admin_obj.get("nombre"));
+                    String contrasena = String.valueOf(admin_obj.get("contrasena"));
+                    String correo = String.valueOf(admin_obj.get("correo"));
 
-            permisos_obj.forEach(o -> {
-                JSONObject p = (JSONObject) o;
-                permisos.add((String) p.toString());
-            });
+                    List<String> permisos = new ArrayList<>();
+                    JSONArray permisos_obj = (JSONArray) admin_obj.get("permisos");
 
-            admin.setNombre(nombre);
-            admin.setContrasena(contrasena);
-            admin.setCorreo(correo);
+                    permisos_obj.forEach(o -> {
+                        JSONObject p = (JSONObject) o;
+                        permisos.add((String) p.toString());
+                    });
 
-            List<String> nueva_lista = new ArrayList<>();
-            if (!permisos.isEmpty()) {
-                permisos.forEach(p -> {
-                    String[] split = p.split(":");
-                    String cadena = split[1].replace("\"", "").replace("}", "");
-                    nueva_lista.add(cadena);
-                });
+                    admin.setNombre(nombre);
+                    admin.setContrasena(contrasena);
+                    admin.setCorreo(correo);
+
+                    List<String> nueva_lista = new ArrayList<>();
+                    if (!permisos.isEmpty()) {
+                        permisos.forEach(p -> {
+                            String[] split = p.split(":");
+                            String cadena = split[1].replace("\"", "").replace("}", "");
+                            nueva_lista.add(cadena);
+                        });
+                    }
+                    admin.setPermisos(nueva_lista);
+                    
+                    return admin;
+                } else {
+                    return null;
+                }
             }
-            admin.setPermisos(nueva_lista);
+        } else {
+            return null;
         }
-
-        return admin;
     }
 
 }

@@ -218,7 +218,6 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             Administrador admin = App.getAdminOnline();
             if (admin.getPermisos().contains("agregar")) {
                 App.getVentanaRegistro().setVisible(true);
-                this.dispose();
             } else {
                 JOptionPane.showMessageDialog(null, "Lo sentimos, no cuentas con los permisos para hacer esto", "Sin permiso", JOptionPane.WARNING_MESSAGE);
             }

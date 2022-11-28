@@ -77,7 +77,15 @@ public class App {
         try (PreparedStatement stmt = getMySQL().getConnection().prepareStatement("SELECT * FROM admins")) {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    getVentanaLogIn().setVisible(true);
+                    if (App.getJSON_Util().getJSON_Admin() == null) {
+                        getVentanaLogIn().setVisible(true);
+                    } else {
+                        Administrador admin = App.getJSON_Util().getJSON_Admin();
+                        setAdminOnline(admin);
+                        
+                        getVentanaPrincipal().actualizar_texto_admin();
+                        getVentanaPrincipal().setVisible(true);
+                    }
                 } else {
                     VentanaRegistrarAdmin admin = new VentanaRegistrarAdmin();
                     admin.setVisible(true);
@@ -172,7 +180,7 @@ public class App {
                 }
             }
         } catch (Exception ex) {
-            System.out.println("Un error ha ocurrido: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
