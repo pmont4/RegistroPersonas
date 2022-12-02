@@ -4,7 +4,9 @@ import entities.Person;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.LinkedList;
 import java.util.Optional;
 import lombok.Getter;
@@ -73,6 +75,12 @@ public class PersonManager {
                 this.getPerson_list().remove(person);
             }
         }
+    }
+    
+    public int getPersonAge(Person person) {
+        LocalDate birth_date = LocalDate.of(person.getBirth_date().getYear(), person.getBirth_date().getMonth(), person.getBirth_date().getDayOfMonth());
+        Period period = Period.between(birth_date, LocalDate.now());
+        return period.getYears();
     }
 
     synchronized void init() throws SQLException {
