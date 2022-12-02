@@ -18,6 +18,8 @@ SELECT * FROM personas;
 SELECT * FROM admins;
 
 TRUNCATE paulo_log;
+TRUNCATE admins;
+TRUNCATE personas;
 
 SELECT * FROM paulo_log;
 
