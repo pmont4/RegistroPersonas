@@ -34,7 +34,7 @@ public class Main {
             if (getMySQLConnection() != null) {
                 PreparedStatement stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS administrators (name VARCHAR(32) NOT NULL, mail VARCHAR(60) NOT NULL, password VARCHAR(16) NOT NULL, address TEXT, perms VARCHAR(10) NOT NULL)");
                 stmt.execute();
-                stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS persons (id INT NOT NULL AUTO_INCREMENT, name varchar(45) NOT NULL, age INT NOT NULL, height VARCHAR(20), gender VARCHAR(1), PRIMARY KEY(id))");
+                stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS persons (id INT NOT NULL AUTO_INCREMENT, name varchar(45) NOT NULL, birth_date VARCHAR(45) NOT NULL, height VARCHAR(20), gender VARCHAR(1), PRIMARY KEY(id))");
                 stmt.execute();
                 stmt.close();
                 
@@ -49,6 +49,10 @@ public class Main {
     public static String parseDate(LocalDateTime date) {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return format.format(date);
+    }
+    
+    public static LocalDateTime getDate(String date) {
+        return LocalDateTime.parse(date);
     }
     
     public static Connection getMySQLConnection() throws SQLException {

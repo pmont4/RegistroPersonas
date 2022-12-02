@@ -4,6 +4,7 @@ import entities.Person;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.Optional;
 import lombok.Getter;
@@ -47,16 +48,17 @@ public class PersonManager {
         return Optional.empty();
     }
     
-    public void createPerson(String name, int age, String height, char gender) throws SQLException {
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO persons (id, name, age, height, gender) VALUES (?,?,?,?,?)")) {
+    public void createPerson(String name, LocalDateTime birth_date, String height, char gender) throws SQLException {
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO persons (id, name, birth_date, height, gender) VALUES (?,?,?,?,?)")) {
             stmt.setInt(1, 0);
             stmt.setString(2, name);
-            stmt.setInt(3, age);
+            stmt.setString(3, Main.parseDate(birth_date));
             stmt.setString(4, height);
             stmt.setString(5, String.valueOf(gender));
             stmt.execute();
             
-            Person person = new Person(0, name, age, height, gender);
+            
+            Person person = new Person(0, name, birth_date, height, gender);
             this.getPerson_list().add(person);
         }
     }
@@ -77,7 +79,7 @@ public class PersonManager {
         try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM persons")) {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Person person = new Person(rs.getInt("id"), rs.getString("name"), rs.getInt("age"), rs.getString("height"), rs.getString("gender").charAt(0));
+                    Person person = new Person(rs.getInt("id"), rs.getString("name"), Main.getDate(rs.getString("birth_date")), rs.getString("height"), rs.getString("gender").charAt(0));
                     this.getPerson_list().add(person);
                 }
             }
