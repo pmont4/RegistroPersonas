@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import json.JSON_Configuration;
 import manager.AdministratorManager;
 import manager.PersonManager;
 import utils.HikariConnection;
@@ -20,7 +21,11 @@ public class Main {
     private static AdministratorManager administratorManager;
     private static PersonManager personManager;
     
+    private static JSON_Configuration json_configuration;
+    
     public static void main(String[] args) {
+        json_configuration = new JSON_Configuration();
+        
         try {
             hikari = new HikariConnection();
             hikari.setUser("paulo");
@@ -65,6 +70,10 @@ public class Main {
     
     public static PersonManager getPersonManager() {
         return personManager;
+    }
+    
+    public static JSON_Configuration getJSON_Configuration() {
+        return json_configuration;
     }
     
 }
