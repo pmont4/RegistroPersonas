@@ -90,6 +90,7 @@ public class JSON_Configuration {
                     String ssl = (String) json_object.get("ssl");
                     
                     sb.append(user).append(":").append(password).append(":").append(host).append(":").append(database).append(":").append(port).append(":").append(ssl);
+                    return sb.toString();
                 } else {
                     return "";
                 }
@@ -97,8 +98,6 @@ public class JSON_Configuration {
         } else {
             return "";
         }
-        
-        return sb.toString();
     }
 
     private String getEnhancedJSONString(JSONObject object) {
