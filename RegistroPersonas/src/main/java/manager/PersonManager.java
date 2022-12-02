@@ -60,6 +60,18 @@ public class PersonManager {
             this.getPerson_list().add(person);
         }
     }
+    
+    public void deletePerson(int id) throws SQLException {
+        Optional<Person> person_o = this.getPerson(id);
+        if (person_o.isPresent()) {
+            Person person = person_o.get();
+            try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("DELETE FROM persons WHERE id=?")) {
+                stmt.setInt(1, person.getId());
+                stmt.executeUpdate();
+                this.getPerson_list().remove(person);
+            }
+        }
+    }
 
     synchronized void init() throws SQLException {
         try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM persons")) {
