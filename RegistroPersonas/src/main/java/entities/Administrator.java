@@ -11,10 +11,10 @@ import org.jetbrains.annotations.Nullable;
 @ToString
 public class Administrator {
     
-    @NotNull private String name;
-    @NotNull private String mail;
-    @NotNull private String password;
-    @Nullable private String address;
+    private String name;
+    private String mail;
+    private String password;
+    private String address;
     
     private List<String> perms;
     private List<String> logger;
@@ -23,7 +23,7 @@ public class Administrator {
     public Administrator() {
     }
 
-    public Administrator(String name, String mail, String password, String address, List<String> perms, List<String> logger, LocalDateTime last_session) {
+    public Administrator(@NotNull String name, @NotNull String mail, @NotNull String password, @Nullable String address, @NotNull List<String> perms, @NotNull List<String> logger, @NotNull LocalDateTime last_session) {
         this.name = name;
         this.mail = mail;
         this.password = password;

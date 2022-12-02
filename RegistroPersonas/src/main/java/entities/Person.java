@@ -9,16 +9,16 @@ import org.jetbrains.annotations.Nullable;
 @ToString
 public class Person {
     
-    @NotNull private int id;
-    @NotNull private String name;
-    @NotNull private int age;
-    @Nullable private String height;
-    @Nullable private char gender;
+    private int id;
+    private String name;
+    private int age;
+    private String height;
+    private char gender;
 
     public Person() {
     }
 
-    public Person(int id, String name, int age, String height, char gender) {
+    public Person(@NotNull int id, @NotNull String name, @NotNull int age, @Nullable String height, @Nullable char gender) {
         this.id = id;
         this.name = name;
         this.age = age;
