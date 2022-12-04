@@ -1,5 +1,6 @@
 package main;
 
+import frames.MySQLConfig_Frame;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -49,7 +50,7 @@ public class Main {
                 hikari.configureProperties();
                 hikari.connect();
 
-                if (getMySQLConnection() != null) {
+                if (getMySQLConnection() != null && !getMySQLConnection().isClosed()) {
                     PreparedStatement stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS administrators (name VARCHAR(32) NOT NULL, mail VARCHAR(60) NOT NULL, password VARCHAR(16) NOT NULL, address TEXT, perms VARCHAR(10) NOT NULL, PRIMARY KEY(mail))");
                     stmt.execute();
                     stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS persons (id INT NOT NULL AUTO_INCREMENT, name varchar(45) NOT NULL, birth_date VARCHAR(45) NOT NULL, height VARCHAR(20), gender VARCHAR(1), PRIMARY KEY(id))");
@@ -58,7 +59,13 @@ public class Main {
 
                     administratorManager = new AdministratorManager();
                     personManager = new PersonManager();
+                } else {
+                    MySQLConfig_Frame mysqlconfig = new MySQLConfig_Frame();
+                    mysqlconfig.setVisible(true);
                 }
+            } else {
+                MySQLConfig_Frame mysqlconfig = new MySQLConfig_Frame();
+                mysqlconfig.setVisible(true);
             }
         } catch (SQLException | IOException | ParseException ex) {
             ex.printStackTrace();

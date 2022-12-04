@@ -1,3 +1,4 @@
 target/
+src/main/java/frames/*.form
 
 dependency-reduced-pom.xml
