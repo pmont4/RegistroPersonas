@@ -1,7 +1,9 @@
 package frames;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Optional;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import main.Main;
@@ -20,6 +22,8 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("Credenciales MySQL");
+
+        JOptionPane.showMessageDialog(null, "Antes de inicar la aplicacion, es requisito contar con una conexion a MySQL, por favor rellene los campos solicitados.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private boolean isWorking = false;
@@ -32,9 +36,16 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
     private String ssl;
 
     public void setConnectionInformation() {
-        if (!(this.userField.getText().isEmpty() && this.passField.getText().isEmpty() && this.databaseField.getText().isEmpty())) {
-            if (!this.portField.getText().contains("[a-zA-Z]")) {
-
+        boolean portFieldContainsLetters = false;
+        for (int i = 0; i < this.portField.getText().length(); i++) {
+            char c = this.portField.getText().charAt(i);
+            if (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ' ')) {
+                portFieldContainsLetters = true;
+            }
+        }
+        
+        if (!portFieldContainsLetters) {
+            if (!(this.userField.getText().isEmpty() && this.passField.getText().isEmpty() && this.databaseField.getText().isEmpty())) {
                 try {
                     user = this.userField.getText();
                     pass = this.passField.getText();
@@ -75,16 +86,20 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
                 }
 
             } else {
-                JOptionPane.showMessageDialog(null, "El campo del puerto no puede contener letras", "Advertencia", JOptionPane.WARNING_MESSAGE);
-                this.portField.setText("");
+                JOptionPane.showMessageDialog(null, "Algunos campos necesarios parecen no haber sido rellenados.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Algunos campos obligatorios no estan llenos, por favor ingrese la informacion requerida", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "El campo del puerto no puede contener letras", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            this.portField.setText("");
         }
     }
 
-    private boolean checkConnection() throws SQLException {
-        return (hikari.getConnection() != null && !hikari.getConnection().isClosed());
+    private Optional<Connection> checkConnection() throws SQLException {
+        if (hikari.getConnection() != null) {
+            return Optional.of(hikari.getConnection());
+        } else {
+            return Optional.empty();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -142,18 +157,27 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
         userLabel.setText("Usuario:");
 
         userField.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        userField.setToolTipText("Requerido");
 
         passLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         passLabel.setText("Contraseña:");
 
+        passField.setToolTipText("Requerido");
+
         hostLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         hostLabel.setText("Host:");
+
+        hostField.setToolTipText("Opcional (Si no se llena sera localhost)");
 
         databaseLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         databaseLabel.setText("Database:");
 
+        databaseField.setToolTipText("Requerido");
+
         portLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         portLabel.setText("Puerto:");
+
+        portField.setToolTipText("Opcional (Si no se llena sera 3306)");
 
         sslLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         sslLabel.setText("SSL:");
@@ -276,7 +300,8 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
     private void checkConnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkConnButtonActionPerformed
         try {
             this.setConnectionInformation();
-            if (this.checkConnection()) {
+            Optional<Connection> conn = this.checkConnection();
+            if (conn.isPresent()) {
                 this.isWorking = true;
                 this.waitingLabel.setText("Conexion correctamente establecida.");
             } else {
@@ -284,40 +309,45 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "La conexion no fue establecida, por favor comprobar los datos ingresados.", "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }//GEN-LAST:event_checkConnButtonActionPerformed
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
-        if (this.userField.getText().equals(user) && this.passField.getText().equals(pass) && this.databaseField.getText().equals(database) && this.portField.getText().equals(String.valueOf(port)) && this.hostField.getText().equals(host)) {
-            if (this.ssl.equals("true") && this.sslCheckBox.isSelected()) {
-                if (this.isWorking) {
+        if (this.isWorking) {
+            if (this.userField.getText().equals(user) && this.passField.getText().equals(pass) && this.databaseField.getText().equals(database) && this.portField.getText().equals(String.valueOf(port)) && this.hostField.getText().equals(host)) {
+                if (this.ssl.equals("true") && this.sslCheckBox.isSelected()) {
                     try {
                         Main.getJSON_Configuration().writeJsonConfigMySQL(user, pass, host, database, port, ssl);
 
                         JOptionPane.showMessageDialog(null, "Los datos han sido correctamente guardados, reinicie el programa.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
+                        this.dispose();
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         ex.printStackTrace();
                     }
-                }
-            } else if (this.ssl.equals("false") && !this.sslCheckBox.isSelected()) {
-                if (this.isWorking) {
+                } else if (this.ssl.equals("false") && !this.sslCheckBox.isSelected()) {
                     try {
                         Main.getJSON_Configuration().writeJsonConfigMySQL(user, pass, host, database, port, ssl);
 
                         JOptionPane.showMessageDialog(null, "Los datos han sido correctamente guardados, reinicie el programa.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
+                        this.dispose();
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         ex.printStackTrace();
                     }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Cambios fueron detectaos en los datos ingresados, por favor volver a comprobar la conexion antes de seguir", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                    this.waitingLabel.setText("Esperando datos...");
+                    this.isWorking = false;
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Cambios fueron detectaos en los datos ingresados, por favor volver a comprobar la conexion antes de seguir", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                this.waitingLabel.setText("Esperando datos...");
                 this.isWorking = false;
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Cambios fueron detectaos en los datos ingresados, por favor volver a comprobar la conexion antes de seguir", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            this.isWorking = false;
+            JOptionPane.showMessageDialog(null, "Todavia no se ha verificado si la conexion puede ser establecida, por favor antes de guardar los datos presione el boton de prueba.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_saveButtonActionPerformed
 
