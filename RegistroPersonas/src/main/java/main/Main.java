@@ -1,9 +1,11 @@
 package main;
 
+import frames.AdministratorRegistration_Frame;
 import frames.MySQLConfig_Frame;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,10 +26,11 @@ public class Main {
     private static PersonManager personManager;
 
     private static JSON_Configuration json_configuration;
+    
+    private static AdministratorRegistration_Frame adminRegis;
 
     public static void main(String[] args) {
         json_configuration = new JSON_Configuration();
-
         try {
             String config_string = getJSON_Configuration().getMySQLConfiguration();
             if (!config_string.equals("")) {
@@ -56,9 +59,18 @@ public class Main {
                     stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS persons (id INT NOT NULL AUTO_INCREMENT, name varchar(45) NOT NULL, birth_date VARCHAR(45) NOT NULL, height VARCHAR(20), gender VARCHAR(1), PRIMARY KEY(id))");
                     stmt.execute();
                     stmt.close();
+                    
+                    adminRegis = new AdministratorRegistration_Frame();
 
-                    administratorManager = new AdministratorManager();
-                    personManager = new PersonManager();
+                    stmt = getMySQLConnection().prepareStatement("SELECT * FROM administrators");
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (!rs.next()) {
+                            adminRegis.setVisible(true);
+                        } else {
+                            administratorManager = new AdministratorManager();
+                            personManager = new PersonManager();
+                        }
+                    }
                 } else {
                     MySQLConfig_Frame mysqlconfig = new MySQLConfig_Frame();
                     mysqlconfig.setVisible(true);

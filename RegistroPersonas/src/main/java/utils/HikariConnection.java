@@ -46,7 +46,7 @@ public class HikariConnection {
     }
     
     public Connection getConnection() throws SQLException {
-        return !connection.isClosed() || connection != null ? this.connection : null;
+        return connection != null ? this.connection : null;
     }
     
 }

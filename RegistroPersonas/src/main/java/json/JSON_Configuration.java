@@ -86,7 +86,7 @@ public class JSON_Configuration {
                     String password = (String) json_object.get("password");
                     String host = (String) json_object.get("host");
                     String database = (String) json_object.get("database");
-                    Integer port = (Integer) json_object.get("port");
+                    Long port = (Long) json_object.get("port");
                     String ssl = (String) json_object.get("ssl");
                     
                     sb.append(user).append(":").append(password).append(":").append(host).append(":").append(database).append(":").append(port).append(":").append(ssl);
