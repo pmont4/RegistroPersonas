@@ -83,13 +83,12 @@ public class AdministratorManager {
         admin.setLogger(new ArrayList<>());
         admin.setLast_session(LocalDateTime.now());
         
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO administrators (name, mail, password, address, perms, last_session) VALUES (?,?,?,?,?,?)")) {
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO administrators (name, mail, password, address, perms) VALUES (?,?,?,?,?)")) {
             stmt.setString(1, admin.getName());
             stmt.setString(2, admin.getMail());
             stmt.setString(3, admin.getPassword());
             stmt.setString(4, admin.getAddress());
             stmt.setString(5, perms);
-            stmt.setString(6, Main.parseDate(LocalDateTime.now()));
             stmt.execute();
         }
         
