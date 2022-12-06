@@ -40,33 +40,34 @@ public class AdministratorRegistration_Frame extends javax.swing.JFrame {
                                     StringBuilder sb = new StringBuilder();
                                     
                                     if (this.addCheckBox.isSelected()) {
-                                        sb.append("add");
-                                    } else if (this.removeCheckBox.isSelected()) {
-                                        sb.append("remove");
-                                    } else if (this.modifyCheckBox.isSelected()) {
-                                        sb.append("modify");
-                                    } else if (this.addCheckBox.isSelected() && this.removeCheckBox.isSelected()) {
-                                        sb.append("add").append(",").append("remove");
-                                    } else if (this.addCheckBox.isSelected() && this.modifyCheckBox.isSelected()) {
-                                        sb.append("add").append(",").append("remove");
-                                    } else if (this.modifyCheckBox.isSelected() && this.removeCheckBox.isSelected()) {
-                                        sb.append("remove").append(",").append("modify");
-                                    } else if (this.addCheckBox.isSelected() && this.removeCheckBox.isSelected() && this.modifyCheckBox.isSelected()) {
-                                        sb.append("add").append(",").append("remove").append(",").append("modify");
+                                        sb.append("add").append(",");
+                                    }
+                                    if (this.removeCheckBox.isSelected()) {
+                                        sb.append("remove").append(",");
+                                    }
+                                    if (this.modifyCheckBox.isSelected()) {
+                                        sb.append("modify").append(",");
                                     }
                                     
                                     String perms = sb.toString();
+                                    
+                                    String new_perms = "";
+                                    char last_char = perms.substring(perms.length() - 1).charAt(0);
+                                    if (last_char == ',') {
+                                        new_perms = perms.substring(0, perms.length() - 1);
+                                    }
                                     
                                     try (PreparedStatement stmt2 = Main.getMySQLConnection().prepareStatement("INSERT INTO administrators (name, mail, password, address, perms) VALUES (?,?,?,?,?)")) {
                                         stmt2.setString(1, name);
                                         stmt2.setString(2, mail);
                                         stmt2.setString(3, pass);
                                         stmt2.setString(4, address);
-                                        stmt2.setString(5, perms);
+                                        stmt2.setString(5, new_perms);
                                         stmt2.execute();
                                     }
                                     
                                     JOptionPane.showMessageDialog(null, "El administrador " + name + " fue registrado exitosamente.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
+                                    this.clear();
                                 } else {
                                     JOptionPane.showMessageDialog(null, "Ya existe un administrador registrado con esa direccion de correo electronico.", "Advertencia", JOptionPane.WARNING_MESSAGE);
                                 }
@@ -85,7 +86,17 @@ public class AdministratorRegistration_Frame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Algunos campos requeridos no han sido rellenados.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }
-
+    
+    private void clear() {
+        this.nameField.setText("");
+        this.mailField.setText("");
+        this.passField.setText("");
+        this.addressField.setText("");
+        this.addCheckBox.setSelected(false);
+        this.removeCheckBox.setSelected(false);
+        this.modifyCheckBox.setSelected(false);
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -305,13 +316,7 @@ public class AdministratorRegistration_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_exitButtonActionPerformed
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
-        this.nameField.setText("");
-        this.mailField.setText("");
-        this.passField.setText("");
-        this.addressField.setText("");
-        this.addCheckBox.setSelected(false);
-        this.removeCheckBox.setSelected(false);
-        this.modifyCheckBox.setSelected(false);
+        this.clear();
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void registerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerButtonActionPerformed
