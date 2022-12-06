@@ -96,7 +96,7 @@ public class JSON_Configuration {
         JSONParser parser = new JSONParser();
 
         if (this.getJson_file_mysql().length() > 0) {
-            try (FileReader read = new FileReader(this.getJson_file_mysql())) {
+            try (BufferedReader read = new BufferedReader(new FileReader(this.getJson_file_mysql()))) {
                 Object object = parser.parse(read);
                 if (object != null) {
                     JSONObject json_object = (JSONObject) object;
