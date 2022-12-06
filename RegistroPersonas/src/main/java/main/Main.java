@@ -1,6 +1,8 @@
 package main;
 
+import entities.Administrator;
 import frames.AdministratorRegistration_Frame;
+import frames.LogIn_Frame;
 import frames.MySQLConfig_Frame;
 import java.io.IOException;
 import java.sql.Connection;
@@ -9,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import json.JSON_Configuration;
 import manager.AdministratorManager;
 import manager.PersonManager;
@@ -28,6 +31,8 @@ public class Main {
     private static JSON_Configuration json_configuration;
     
     private static AdministratorRegistration_Frame adminRegis;
+    
+    private static Administrator admin_online;
 
     public static void main(String[] args) {
         json_configuration = new JSON_Configuration();
@@ -69,6 +74,17 @@ public class Main {
                         } else {
                             administratorManager = new AdministratorManager();
                             personManager = new PersonManager();
+                            
+                            if (!getJSON_Configuration().existsSessionFile()) {
+                                LogIn_Frame login = new LogIn_Frame();
+                                login.setVisible(true);
+                            } else {
+                                Optional<Administrator> opt = getJSON_Configuration().getCurrentAdminInJSONFile();
+                                if (opt.isPresent()) {
+                                    Administrator admin = opt.get();
+                                    setAdministratorOnline(admin);
+                                }
+                            }
                         }
                     }
                 } else {
@@ -108,5 +124,13 @@ public class Main {
     public static JSON_Configuration getJSON_Configuration() {
         return json_configuration;
     }
-
+    
+    public static void setAdministratorOnline(Administrator admin) {
+        admin_online = admin;
+    }
+    
+    public static Administrator getAdministratorOnline() {
+        return admin_online;
+    }
+    
 }

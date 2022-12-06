@@ -81,7 +81,6 @@ public class AdministratorManager {
         }
         
         admin.setLogger(new ArrayList<>());
-        admin.setLast_session(LocalDateTime.now());
         
         try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO administrators (name, mail, password, address, perms) VALUES (?,?,?,?,?)")) {
             stmt.setString(1, admin.getName());
@@ -101,7 +100,7 @@ public class AdministratorManager {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     String newPass = rs.getString("password").replaceAll(".", "*");
-                    Administrator admin = new Administrator(rs.getString("name"), rs.getString("mail"), newPass, rs.getString("address"), new ArrayList<>(), new ArrayList<>(), LocalDateTime.now());
+                    Administrator admin = new Administrator(rs.getString("name"), rs.getString("mail"), newPass, rs.getString("address"), new ArrayList<>(), new ArrayList<>());
 
                     if (rs.getString("perms").contains(",")) {
                         String[] split = rs.getString("perms").split(",");
