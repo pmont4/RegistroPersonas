@@ -49,20 +49,14 @@ public class AdministratorRegistration_Frame extends javax.swing.JFrame {
                                         sb.append("modify").append(",");
                                     }
                                     
-                                    String perms = sb.toString();
-                                    
-                                    String new_perms = "";
-                                    char last_char = perms.charAt(perms.length() - 1);
-                                    if (last_char == ',') {
-                                        new_perms = perms.substring(0, perms.length() - 1);
-                                    }
+                                    String perms = sb.toString();  
                                     
                                     try (PreparedStatement stmt2 = Main.getMySQLConnection().prepareStatement("INSERT INTO administrators (name, mail, password, address, perms) VALUES (?,?,?,?,?)")) {
                                         stmt2.setString(1, name);
                                         stmt2.setString(2, mail);
                                         stmt2.setString(3, pass);
                                         stmt2.setString(4, address);
-                                        stmt2.setString(5, new_perms);
+                                        stmt2.setString(5, perms.substring(0, perms.length() - 1));
                                         stmt2.execute();
                                     }
                                     
