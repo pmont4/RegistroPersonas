@@ -52,7 +52,7 @@ public class AdministratorRegistration_Frame extends javax.swing.JFrame {
                                     String perms = sb.toString();
                                     
                                     String new_perms = "";
-                                    char last_char = perms.substring(perms.length() - 1).charAt(0);
+                                    char last_char = perms.charAt(perms.length() - 1);
                                     if (last_char == ',') {
                                         new_perms = perms.substring(0, perms.length() - 1);
                                     }
