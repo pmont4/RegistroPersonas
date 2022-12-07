@@ -88,6 +88,9 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                                     Main.getPersonManager().createPerson(name, date, height, gender);
 
                                     JOptionPane.showMessageDialog(null, "La persona " + name + " fue correctamente registrada.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
+
+                                    Main.getMain_frame().clearRowsInTable();
+                                    Main.getMain_frame().fillTable_People();
                                     this.clear();
                                 } else {
                                     JOptionPane.showMessageDialog(null, "La altura ingresada no es valida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
@@ -101,6 +104,9 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                             Main.getPersonManager().createPerson(name, date, height, gender);
 
                             JOptionPane.showMessageDialog(null, "La persona " + name + " fue correctamente registrada.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
+
+                            Main.getMain_frame().clearRowsInTable();
+                            Main.getMain_frame().fillTable_People();
                             this.clear();
                         }
                     } else {

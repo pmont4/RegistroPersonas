@@ -72,17 +72,17 @@ public class Main {
                     stmt.execute();
                     stmt.close();
                     
-                    adminRegis = new AdministratorRegistration_Frame();
+                    administratorManager = new AdministratorManager();
+                    personManager = new PersonManager();
+          
                     main_frame = new Main_Frame();
 
                     stmt = getMySQLConnection().prepareStatement("SELECT * FROM administrators");
                     try (ResultSet rs = stmt.executeQuery()) {
                         if (!rs.next()) {
+                            adminRegis = new AdministratorRegistration_Frame();
                             adminRegis.setVisible(true);
                         } else {
-                            administratorManager = new AdministratorManager();
-                            personManager = new PersonManager();
-                            
                             LogIn_Frame login = new LogIn_Frame();
                             if (!getJSON_Configuration().existsSessionFile()) {
                                 login.setVisible(true);

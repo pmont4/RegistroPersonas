@@ -2,6 +2,7 @@ package frames;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 import main.Main;
 
 public class Main_Frame extends javax.swing.JFrame {
@@ -12,10 +13,49 @@ public class Main_Frame extends javax.swing.JFrame {
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        this.fillTable_People();
     }
     
     public void updateTitle(String s) {
         this.setTitle(s);
+    }
+    
+    public void fillTable_People() {
+        Object[] data = new Object[this.personsTable.getColumnCount()];
+        DefaultTableModel newModel = (DefaultTableModel) this.personsTable.getModel();
+        Main.getPersonManager().getPerson_list().forEach(p -> {
+            data[0] = p.getId();
+            data[1] = p.getName();
+            data[2] = p.getBirth_date();
+            data[3] = Main.getPersonManager().getPersonAge(p);
+            data[4] = p.getHeight();
+            switch (p.getGender()) {
+                case 'M':{
+                    data[5] = "Masculino";
+                    break;
+                }
+                case 'F':{
+                    data[5] = "Femenino";
+                    break;
+                }
+                case 'N':
+                default:{
+                    data[5] = "No especificado";
+                    break;
+                }
+            }
+            
+            newModel.addRow(data);
+        });
+        
+        this.personsTable.setModel(newModel);
+    }
+    
+    public void clearRowsInTable() {
+        DefaultTableModel model = (DefaultTableModel) this.personsTable.getModel();
+        model.setRowCount(0);
+        this.personsTable.setModel(model);
     }
 
     @SuppressWarnings("unchecked")
