@@ -3,6 +3,9 @@ package frames;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import main.Main;
 
@@ -42,69 +45,69 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
     }
 
     private boolean containsNumbers(String s) {
-        char[] arr = s.toCharArray();
-        for (Character c : arr) {
-            return Character.isDigit(c);
-        }
-        return false;
+        Pattern p = Pattern.compile("([0-9])");
+        Matcher m = p.matcher(s);
+        return m.find();
     }
 
     private void registerPerson() throws SQLException {
         if (!(this.nameField.getText().isEmpty() && this.dayField.getText().isEmpty() && this.monthField.getText().isEmpty() && this.yearField.getText().isEmpty())) {
             if (!this.containsNumbers(this.nameField.getText())) {
                 if (this.checkLettersInDateFields() && (this.dayField.getText().length() == 2 && this.monthField.getText().length() == 2 && this.yearField.getText().length() == 4)) {
-                    String name = this.nameField.getText();
+                    int day = Integer.parseInt(this.dayField.getText()), month = Integer.parseInt(this.monthField.getText()), year = Integer.parseInt(this.yearField.getText());
+                    if ((day > 0 && day <= 31) && (month > 0 && month <= 12) && (year > 1910 && year <= LocalDateTime.now().getYear())) {
+                        String name = this.nameField.getText();
 
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(this.yearField.getText()).append("-").append(this.monthField.getText()).append("-").append(this.dayField.getText());
-                    String date = sb.toString();
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(this.yearField.getText()).append("-").append(this.monthField.getText()).append("-").append(this.dayField.getText());
+                        String date = sb.toString();
 
-                    char gender;
-                    switch (this.genderComboBox.getSelectedIndex()) {
-                        case 0: {
-                            gender = 'M';
-                            break;
+                        char gender;
+                        switch (this.genderComboBox.getSelectedIndex()) {
+                            case 0: {
+                                gender = 'M';
+                                break;
+                            }
+                            case 1: {
+                                gender = 'F';
+                                break;
+                            }
+                            case 2:
+                            default: {
+                                gender = 'N';
+                                break;
+                            }
                         }
-                        case 1: {
-                            gender = 'F';
-                            break;
-                        }
-                        case 2:
-                        default: {
-                            gender = 'N';
-                            break;
-                        }
-                    }
 
-                    String height;
-                    if (!this.heightField.getText().isEmpty()) {
-                        if (this.heightField.getText().length() <= 6) {
-                            if (this.heightField.getText().contains("cm") || this.heightField.getText().contains("ft")) {
-                                height = this.heightField.getText();
+                        String height;
+                        if (!this.heightField.getText().isEmpty()) {
+                            if (this.heightField.getText().length() <= 6) {
+                                if (this.heightField.getText().contains("cm") || this.heightField.getText().contains("ft")) {
+                                    height = this.heightField.getText();
 
-                                Main.getPersonManager().createPerson(name, date, height, gender);
+                                    Main.getPersonManager().createPerson(name, date, height, gender);
 
-                                JOptionPane.showMessageDialog(null, "La persona " + name + " fue correctamente registrada.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
-                                this.clear();
+                                    JOptionPane.showMessageDialog(null, "La persona " + name + " fue correctamente registrada.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
+                                    this.clear();
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "La altura ingresada no es valida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                                }
                             } else {
                                 JOptionPane.showMessageDialog(null, "La altura ingresada no es valida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
                             }
                         } else {
-                            JOptionPane.showMessageDialog(null, "La altura ingresada no es valida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                            height = "None";
+
+                            Main.getPersonManager().createPerson(name, date, height, gender);
+
+                            JOptionPane.showMessageDialog(null, "La persona " + name + " fue correctamente registrada.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
+                            this.clear();
                         }
                     } else {
-                        height = "None";
-
-                        Main.getPersonManager().createPerson(name, date, height, gender);
-
-                        JOptionPane.showMessageDialog(null, "La persona " + name + " fue correctamente registrada.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
-                        this.clear();
+                        JOptionPane.showMessageDialog(null, "La fecha introducida no es valida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
                     }
                 } else {
                     JOptionPane.showMessageDialog(null, "La fecha introducida no es valida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-                    System.out.println("d" + this.dayField.getText().length());
-                    System.out.println("m" + this.monthField.getText().length());
-                    System.out.println("y" + this.yearField.getText().length());
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "El campo del nombre no puede contener numeros.", "Advertencia", JOptionPane.WARNING_MESSAGE);
