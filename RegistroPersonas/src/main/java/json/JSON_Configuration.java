@@ -129,18 +129,8 @@ public class JSON_Configuration {
                     admin_obj.put("mail", admin.getMail());
                     admin_obj.put("save_date", Main.parseDate(LocalDateTime.now()));
 
-                    if (file.length() < 0) {
-                        writer.write(this.getEnhancedJSONString(admin_obj));
-                        writer.flush();
-                    } else {
-                        try (BufferedWriter delete = new BufferedWriter(new FileWriter(file))) {
-                            delete.write("");
-                            delete.flush();
-                        } finally {
-                            writer.write(this.getEnhancedJSONString(admin_obj));
-                            writer.flush();
-                        }
-                    }
+                    writer.write(this.getEnhancedJSONString(admin_obj));
+                    writer.flush();
                 }
             }
         }
@@ -170,6 +160,13 @@ public class JSON_Configuration {
         }
     }
 
+    public void removeExistingSessionFile() throws IOException {
+        File file = new File(this.getSession_directory().getAbsolutePath() + "\\session_" + Main.parseDate(LocalDateTime.now()) + ".json");
+        if (file.exists()) {
+            if (file.delete());
+        }
+    }
+    
     public boolean existsSessionFile() {
         File file = new File(this.getSession_directory().getAbsolutePath() + "\\session_" + Main.parseDate(LocalDateTime.now()) + ".json");
         return file.exists();

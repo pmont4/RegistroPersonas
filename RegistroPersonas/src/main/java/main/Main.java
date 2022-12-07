@@ -3,6 +3,7 @@ package main;
 import entities.Administrator;
 import frames.AdministratorRegistration_Frame;
 import frames.LogIn_Frame;
+import frames.Main_Frame;
 import frames.MySQLConfig_Frame;
 import java.io.IOException;
 import java.sql.Connection;
@@ -33,6 +34,12 @@ public class Main {
     private static AdministratorRegistration_Frame adminRegis;
     
     private static Administrator admin_online;
+    
+    /*
+    * ventanas accesibles
+    */
+    
+    private static Main_Frame main_frame;
 
     public static void main(String[] args) {
         json_configuration = new JSON_Configuration();
@@ -66,6 +73,7 @@ public class Main {
                     stmt.close();
                     
                     adminRegis = new AdministratorRegistration_Frame();
+                    main_frame = new Main_Frame();
 
                     stmt = getMySQLConnection().prepareStatement("SELECT * FROM administrators");
                     try (ResultSet rs = stmt.executeQuery()) {
@@ -75,14 +83,18 @@ public class Main {
                             administratorManager = new AdministratorManager();
                             personManager = new PersonManager();
                             
+                            LogIn_Frame login = new LogIn_Frame();
                             if (!getJSON_Configuration().existsSessionFile()) {
-                                LogIn_Frame login = new LogIn_Frame();
                                 login.setVisible(true);
                             } else {
                                 Optional<Administrator> opt = getJSON_Configuration().getCurrentAdminInJSONFile();
                                 if (opt.isPresent()) {
                                     Administrator admin = opt.get();
                                     setAdministratorOnline(admin);
+                                    
+                                    main_frame.setVisible(true);
+                                } else {
+                                    login.setVisible(true);
                                 }
                             }
                         }
@@ -131,6 +143,10 @@ public class Main {
     
     public static Administrator getAdministratorOnline() {
         return admin_online;
+    }
+    
+    public static Main_Frame getMain_frame() {
+        return main_frame;
     }
     
 }

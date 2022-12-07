@@ -186,7 +186,9 @@ public class LogIn_Frame extends javax.swing.JFrame {
                     System.out.println(admin.toString());
                     
                     JOptionPane.showMessageDialog(null, "Sesion iniciada correctamente.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
-                    System.exit(0);
+                    
+                    Main.getMain_frame().setVisible(true);
+                    this.dispose();
                 } else {
                     JOptionPane.showMessageDialog(null, "El correo electronico o la contraseña parecen no ser correctos, intentelo de nuevo.", "Advertencia", JOptionPane.WARNING_MESSAGE);
                 }
