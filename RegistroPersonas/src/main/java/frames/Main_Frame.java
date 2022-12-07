@@ -1,8 +1,14 @@
 package frames;
 
+import entities.Person;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.sql.SQLException;
+import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import main.Main;
 
 public class Main_Frame extends javax.swing.JFrame {
@@ -15,10 +21,33 @@ public class Main_Frame extends javax.swing.JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         this.fillTable_People();
+        
+        this.addWindowListener(new WindowAdapter() {
+            
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try {
+                    Main.getMySQLConnection().close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            
+        });
     }
+    
+    private boolean hasFilterApplied = false;
     
     public void updateTitle(String s) {
         this.setTitle(s);
+    }
+    
+    public TableModel getPeopleTableModel() {
+        return this.personsTable.getModel();
+    }
+    
+    public void updateTableModel(TableModel model) {
+        this.personsTable.setModel(model);
     }
     
     public void fillTable_People() {
@@ -73,6 +102,11 @@ public class Main_Frame extends javax.swing.JFrame {
         exitMenuItem = new javax.swing.JMenuItem();
         personsMenu = new javax.swing.JMenu();
         addPersonMenuItem = new javax.swing.JMenuItem();
+        searchPersonMenuItem = new javax.swing.JMenuItem();
+        filtersMenu = new javax.swing.JMenu();
+        adultFilterMenuItem = new javax.swing.JMenuItem();
+        youngerPeopleFilterMenuItem = new javax.swing.JMenuItem();
+        removeFiltersMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -192,7 +226,46 @@ public class Main_Frame extends javax.swing.JFrame {
         });
         personsMenu.add(addPersonMenuItem);
 
+        searchPersonMenuItem.setText("Mostar persona");
+        searchPersonMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchPersonMenuItemActionPerformed(evt);
+            }
+        });
+        personsMenu.add(searchPersonMenuItem);
+
         jMenuBar1.add(personsMenu);
+
+        filtersMenu.setText("Filtros");
+
+        adultFilterMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        adultFilterMenuItem.setText("Filtrar mayores de edad");
+        adultFilterMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                adultFilterMenuItemActionPerformed(evt);
+            }
+        });
+        filtersMenu.add(adultFilterMenuItem);
+
+        youngerPeopleFilterMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_2, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        youngerPeopleFilterMenuItem.setText("Filtrar menores de edad");
+        youngerPeopleFilterMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                youngerPeopleFilterMenuItemActionPerformed(evt);
+            }
+        });
+        filtersMenu.add(youngerPeopleFilterMenuItem);
+
+        removeFiltersMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        removeFiltersMenuItem.setText("Remover filtros");
+        removeFiltersMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeFiltersMenuItemActionPerformed(evt);
+            }
+        });
+        filtersMenu.add(removeFiltersMenuItem);
+
+        jMenuBar1.add(filtersMenu);
 
         setJMenuBar(jMenuBar1);
 
@@ -229,15 +302,124 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
     private void addPersonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addPersonMenuItemActionPerformed
-        AddPerson_Frame addperson = new AddPerson_Frame();
-        this.mainPane.add(addperson);
-        addperson.show();
+        if (Main.getAdministratorOnline().getPerms().contains("add")) {
+            AddPerson_Frame addperson = new AddPerson_Frame();
+            this.mainPane.add(addperson);
+            addperson.show();
+        } else {
+            JOptionPane.showMessageDialog(null, "No tienes permisos para abrir esta ventana.", "Permisos insuficientes", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_addPersonMenuItemActionPerformed
+
+    private void adultFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adultFilterMenuItemActionPerformed
+        this.clearRowsInTable();
+        
+        int adult_count = 0;
+        Object[] data = new Object[this.personsTable.getColumnCount()];
+        DefaultTableModel newModel = (DefaultTableModel) this.personsTable.getModel();
+        for (Map.Entry<Person, Integer> map : Main.getPersonManager().getAgeMap().entrySet()) {
+            if (map.getValue() >= 18) {
+                data[0] = map.getKey().getId();
+                data[1] = map.getKey().getName();
+                data[2] = map.getKey().getBirth_date();
+                data[3] = map.getValue();
+                data[4] = map.getKey().getHeight();
+                switch (map.getKey().getGender()) {
+                    case 'M':{
+                        data[5] = "Masculino";
+                        break;
+                    }
+                    case 'F':{
+                        data[5] = "Femenino";
+                        break;
+                    }
+                    case 'N':
+                    default:{
+                        data[5] = "No especificado";
+                        break;
+                    }
+                }
+                
+                adult_count++;
+                newModel.addRow(data);
+            }
+        }
+        
+        if (adult_count == 0) {
+            this.fillTable_People();
+            JOptionPane.showMessageDialog(null, "Ningun adulto fue encontrado en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
+        } else {
+            this.updateTableModel(newModel);
+            this.hasFilterApplied = true;
+        }
+    }//GEN-LAST:event_adultFilterMenuItemActionPerformed
+
+    private void youngerPeopleFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_youngerPeopleFilterMenuItemActionPerformed
+        this.clearRowsInTable();
+        
+        int younger_cont = 0;
+        Object[] data = new Object[this.personsTable.getColumnCount()];
+        DefaultTableModel newModel = (DefaultTableModel) this.personsTable.getModel();
+        for (Map.Entry<Person, Integer> map : Main.getPersonManager().getAgeMap().entrySet()) {
+            if (map.getValue() < 18) {
+                data[0] = map.getKey().getId();
+                data[1] = map.getKey().getName();
+                data[2] = map.getKey().getBirth_date();
+                data[3] = map.getValue();
+                data[4] = map.getKey().getHeight();
+                switch (map.getKey().getGender()) {
+                    case 'M':{
+                        data[5] = "Masculino";
+                        break;
+                    }
+                    case 'F':{
+                        data[5] = "Femenino";
+                        break;
+                    }
+                    case 'N':
+                    default:{
+                        data[5] = "No especificado";
+                        break;
+                    }
+                }
+                
+                younger_cont++;
+                newModel.addRow(data);
+            }
+        }
+        
+        if (younger_cont == 0) {
+            this.fillTable_People();
+            JOptionPane.showMessageDialog(null, "Ningun menor fue encontrado en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
+        } else {
+            this.personsTable.setModel(newModel);
+            this.hasFilterApplied = true;
+        }
+    }//GEN-LAST:event_youngerPeopleFilterMenuItemActionPerformed
+
+    private void removeFiltersMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeFiltersMenuItemActionPerformed
+        if (this.hasFilterApplied) {
+            this.clearRowsInTable();
+            this.fillTable_People();
+            
+            this.hasFilterApplied = false;
+        } else {
+            JOptionPane.showMessageDialog(null, "Ningun filtro fue previamente aplicado.", "Filtros", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_removeFiltersMenuItemActionPerformed
+
+    private void searchPersonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchPersonMenuItemActionPerformed
+        SearchPerson_Frame search = new SearchPerson_Frame();
+        this.mainPane.add(search);
+        search.show();
+    }//GEN-LAST:event_searchPersonMenuItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addPersonMenuItem;
+    private javax.swing.JMenuItem adultFilterMenuItem;
     private javax.swing.JMenuItem closeSessionMenuItem;
     private javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenu filtersMenu;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
@@ -246,6 +428,9 @@ public class Main_Frame extends javax.swing.JFrame {
     private javax.swing.JMenu optionsMenu;
     private javax.swing.JMenu personsMenu;
     private javax.swing.JTable personsTable;
+    private javax.swing.JMenuItem removeFiltersMenuItem;
+    private javax.swing.JMenuItem searchPersonMenuItem;
+    private javax.swing.JMenuItem youngerPeopleFilterMenuItem;
     // End of variables declaration//GEN-END:variables
 
 }
