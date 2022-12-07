@@ -92,6 +92,7 @@ public class Main {
                                     Administrator admin = opt.get();
                                     setAdministratorOnline(admin);
                                     
+                                    main_frame.updateTitle("Registro personas (Administrador conectado: " + admin.getName() + ")");
                                     main_frame.setVisible(true);
                                 } else {
                                     login.setVisible(true);

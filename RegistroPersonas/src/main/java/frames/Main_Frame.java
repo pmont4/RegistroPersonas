@@ -12,7 +12,10 @@ public class Main_Frame extends javax.swing.JFrame {
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setTitle("Registro personas");
+    }
+    
+    public void updateTitle(String s) {
+        this.setTitle(s);
     }
 
     @SuppressWarnings("unchecked")
@@ -127,6 +130,7 @@ public class Main_Frame extends javax.swing.JFrame {
         });
         optionsMenu.add(closeSessionMenuItem);
 
+        exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         exitMenuItem.setText("Salir");
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
