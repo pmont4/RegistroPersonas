@@ -120,14 +120,14 @@ public class JSON_Configuration {
     }
 
     public void saveAdminSession(Administrator admin) throws IOException {
-        File file = new File(this.getSession_directory().getAbsolutePath() + "\\session_" + Main.parseDate(LocalDateTime.now()) + ".json");
+        File file = new File(this.getSession_directory().getAbsolutePath() + "\\session_" + Main.formatDate(LocalDateTime.now()) + ".json");
         if (!file.exists()) {
             if (file.createNewFile()) {
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
                     JSONObject admin_obj = new JSONObject();
                     admin_obj.put("name", admin.getName());
                     admin_obj.put("mail", admin.getMail());
-                    admin_obj.put("save_date", Main.parseDate(LocalDateTime.now()));
+                    admin_obj.put("save_date", Main.formatDate(LocalDateTime.now()));
 
                     writer.write(this.getEnhancedJSONString(admin_obj));
                     writer.flush();
@@ -137,7 +137,7 @@ public class JSON_Configuration {
     }
 
     public Optional<Administrator> getCurrentAdminInJSONFile() throws IOException, ParseException, SQLException {
-        File file = new File(this.getSession_directory().getAbsolutePath() + "\\session_" + Main.parseDate(LocalDateTime.now()) + ".json");
+        File file = new File(this.getSession_directory().getAbsolutePath() + "\\session_" + Main.formatDate(LocalDateTime.now()) + ".json");
         JSONParser parser = new JSONParser();
 
         if (file.exists()) {
@@ -161,14 +161,14 @@ public class JSON_Configuration {
     }
 
     public void removeExistingSessionFile() throws IOException {
-        File file = new File(this.getSession_directory().getAbsolutePath() + "\\session_" + Main.parseDate(LocalDateTime.now()) + ".json");
+        File file = new File(this.getSession_directory().getAbsolutePath() + "\\session_" + Main.formatDate(LocalDateTime.now()) + ".json");
         if (file.exists()) {
             if (file.delete());
         }
     }
     
     public boolean existsSessionFile() {
-        File file = new File(this.getSession_directory().getAbsolutePath() + "\\session_" + Main.parseDate(LocalDateTime.now()) + ".json");
+        File file = new File(this.getSession_directory().getAbsolutePath() + "\\session_" + Main.formatDate(LocalDateTime.now()) + ".json");
         return file.exists();
     }
 

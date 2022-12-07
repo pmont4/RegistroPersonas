@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.LinkedList;
 import java.util.Optional;
@@ -50,11 +49,11 @@ public class PersonManager {
         return Optional.empty();
     }
     
-    public void createPerson(String name, LocalDateTime birth_date, String height, char gender) throws SQLException {
+    public void createPerson(String name, String birth_date, String height, char gender) throws SQLException {
         try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO persons (id, name, birth_date, height, gender) VALUES (?,?,?,?,?)")) {
             stmt.setInt(1, 0);
             stmt.setString(2, name);
-            stmt.setString(3, Main.parseDate(birth_date));
+            stmt.setString(3, birth_date);
             stmt.setString(4, height);
             stmt.setString(5, String.valueOf(gender));
             stmt.execute();
@@ -78,7 +77,13 @@ public class PersonManager {
     }
     
     public int getPersonAge(Person person) {
-        LocalDate birth_date = LocalDate.of(person.getBirth_date().getYear(), person.getBirth_date().getMonth(), person.getBirth_date().getDayOfMonth());
+        String[] split = person.getBirth_date().split("-");
+        
+        int year = Integer.parseInt(split[0]);
+        int month = Integer.parseInt(split[1]);
+        int day = Integer.parseInt(split[2]);
+        
+        LocalDate birth_date = LocalDate.of(year, month, day);
         Period period = Period.between(birth_date, LocalDate.now());
         return period.getYears();
     }
@@ -87,7 +92,7 @@ public class PersonManager {
         try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM persons")) {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Person person = new Person(rs.getInt("id"), rs.getString("name"), Main.getDate(rs.getString("birth_date")), rs.getString("height"), rs.getString("gender").charAt(0));
+                    Person person = new Person(rs.getInt("id"), rs.getString("name"), rs.getString("birth_date"), rs.getString("height"), rs.getString("gender").charAt(0));
                     this.getPerson_list().add(person);
                 }
             }

@@ -1,18 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package frames;
 
 import java.io.IOException;
 import javax.swing.JOptionPane;
 import main.Main;
 
-/**
- *
- * @author paulo
- */
 public class CloseSession_Frame extends javax.swing.JInternalFrame {
 
     /**

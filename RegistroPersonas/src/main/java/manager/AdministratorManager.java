@@ -148,7 +148,7 @@ public class AdministratorManager {
     private void updateLogAdmin(Administrator admin) throws SQLException {
         if (this.tableExists(admin.getName() + "_log")) {
             try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + admin.getName() + "_log WHERE date=?")) {
-                stmt.setString(1, Main.parseDate(LocalDateTime.now()));
+                stmt.setString(1, Main.formatDate(LocalDateTime.now()));
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         if (rs.getString("log").contains(",")) {

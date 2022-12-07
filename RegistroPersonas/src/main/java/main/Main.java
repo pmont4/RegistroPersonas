@@ -112,13 +112,9 @@ public class Main {
         }
     }
 
-    public static String parseDate(LocalDateTime date) {
+    public static String formatDate(LocalDateTime date) {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return format.format(date);
-    }
-
-    public static LocalDateTime getDate(String date) {
-        return LocalDateTime.parse(date);
     }
 
     public static Connection getMySQLConnection() throws SQLException {
