@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import javax.swing.JOptionPane;
 import json.JSON_Configuration;
 import manager.AdministratorManager;
 import manager.PersonManager;
@@ -66,11 +67,8 @@ public class Main {
                 hikari.connect();
 
                 if (getMySQLConnection() != null && !getMySQLConnection().isClosed()) {
-                    PreparedStatement stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS administrators (name VARCHAR(32) NOT NULL, mail VARCHAR(60) NOT NULL, password VARCHAR(16) NOT NULL, address TEXT, perms VARCHAR(18) NOT NULL, PRIMARY KEY(mail))");
+                    PreparedStatement stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS people (id INT NOT NULL AUTO_INCREMENT, name varchar(45) NOT NULL, birth_date VARCHAR(45) NOT NULL, height VARCHAR(22), gender VARCHAR(1), PRIMARY KEY(id))");
                     stmt.execute();
-                    stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS people (id INT NOT NULL AUTO_INCREMENT, name varchar(45) NOT NULL, birth_date VARCHAR(45) NOT NULL, height VARCHAR(22), gender VARCHAR(1), PRIMARY KEY(id))");
-                    stmt.execute();
-                    stmt.close();
                     
                     administratorManager = new AdministratorManager();
                     personManager = new PersonManager();
@@ -79,10 +77,7 @@ public class Main {
 
                     stmt = getMySQLConnection().prepareStatement("SELECT * FROM administrators");
                     try (ResultSet rs = stmt.executeQuery()) {
-                        if (!rs.next()) {
-                            adminRegis = new AdministratorRegistration_Frame();
-                            adminRegis.setVisible(true);
-                        } else {
+                        if (rs.next()) {
                             LogIn_Frame login = new LogIn_Frame();
                             if (!getJSON_Configuration().existsSessionFile()) {
                                 login.setVisible(true);
@@ -98,8 +93,12 @@ public class Main {
                                     login.setVisible(true);
                                 }
                             }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "No se encontraron administradores en la base de datos, por favot ejecutar la aplicacion de registro de administradores y registrar al menos 1.", "Administradores", JOptionPane.ERROR_MESSAGE);
+                            System.exit(0);
                         }
                     }
+                    stmt.close();
                 } else {
                     MySQLConfig_Frame mysqlconfig = new MySQLConfig_Frame();
                     mysqlconfig.setVisible(true);
@@ -144,6 +143,20 @@ public class Main {
     
     public static Main_Frame getMain_frame() {
         return main_frame;
+    }
+    
+    public static boolean tableExists(String table) throws SQLException {
+        boolean exists = false;
+        try (ResultSet rs = Main.getMySQLConnection().getMetaData().getTables(null, null, table, null)) {
+            while (rs.next()) {
+                String name = rs.getString("TABLE_NAME");
+                if (name != null && name.equals(table.toLowerCase())) {
+                    exists = true;
+                    break;
+                }
+            }
+        }
+        return exists;
     }
     
 }

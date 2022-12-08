@@ -16,16 +16,21 @@ public class Administrator {
     private String address;
     
     private List<String> perms;
+    private List<String> logger;
+    
+    private String last_session;
 
     public Administrator() {
     }
 
-    public Administrator(@NotNull String name, @NotNull String mail, @NotNull String password, @Nullable String address, @NotNull List<String> perms) {
+    public Administrator(@NotNull String name, @NotNull String mail, @NotNull String password, @Nullable String address, @NotNull List<String> perms, @NotNull List<String> logger, String last_session) {
         this.name = name;
         this.mail = mail;
         this.password = password;
         this.address = address;
         this.perms = perms;
+        this.logger = logger;
+        this.last_session = last_session;
     }
     
 }

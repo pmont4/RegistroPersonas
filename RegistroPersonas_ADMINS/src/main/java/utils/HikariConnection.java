@@ -2,12 +2,10 @@ package utils;
 
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import main.Main;
 
 public class HikariConnection {
     
