@@ -138,7 +138,7 @@ public class AdministratorManager {
         
         if (Main.tableExists(admin.getName() + "_log")) {
             String table_name = admin.getName() + "_log";
-            try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + table_name)) {
+            try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + table_name + " ORDER BY log")) {
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         String log = rs.getString("date") + ":" + "log:" + rs.getString("log");
