@@ -9,13 +9,16 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.Getter;
 import main.Main;
 import utils.NoSpecifiedPermsException;
 
 public class AdministratorManager {
 
-    @Getter private LinkedList<Administrator> administrator_list;
+    @Getter
+    private LinkedList<Administrator> administrator_list;
 
     public AdministratorManager() {
         try {
@@ -45,7 +48,7 @@ public class AdministratorManager {
         admin.setMail(mail);
         admin.setPassword(password);
         admin.setAddress(address);
-        
+
         if (perms.contains(",")) {
             String[] split = perms.split(",");
             boolean validStringPerms = false;
@@ -56,7 +59,7 @@ public class AdministratorManager {
                     throw new NoSpecifiedPermsException("The current permission string does not contains any existing permission (Add, remove, modify), please verify the upcoming permission string and try again.");
                 }
             }
-        
+
             if (validStringPerms) {
                 admin.setPerms(Arrays.asList(split));
             }
@@ -67,7 +70,7 @@ public class AdministratorManager {
                 throw new NoSpecifiedPermsException("The current permission string does not contains any existing permission (Add, remove, modify), please verify the upcoming permission string and try again.");
             }
         }
-        
+
         try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO administrators (name, mail, password, address, perms) VALUES (?,?,?,?,?)")) {
             stmt.setString(1, admin.getName());
             stmt.setString(2, admin.getMail());
@@ -76,7 +79,7 @@ public class AdministratorManager {
             stmt.setString(5, perms);
             stmt.execute();
         }
-        
+
         this.getAdministrator_list().add(admin);
     }
 
@@ -114,28 +117,24 @@ public class AdministratorManager {
                 }
             }
 
-            if (!this.getAdministrator_list().isEmpty()) {
-                for (Administrator a : this.getAdministrator_list()) {
-                    try {
-                        stmt = Main.getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS " + a.getName() + "_log (date VARCHAR(45) NOT NULL, log LONGTEXT, PRIMARY KEY(date))");
-                        stmt.execute();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    
+            this.getAdministrator_list().forEach(a -> {
+                try {
                     this.updateAdministratosLogger(a);
                     this.updateLastSessionDate(a);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
-            }
+            });
+            
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
-        } 
+        }
     }
-    
+
     public void updateAdministratosLogger(Administrator admin) throws SQLException {
         List<String> logger = new ArrayList<>();
-        
+
         if (Main.tableExists(admin.getName() + "_log")) {
             String table_name = admin.getName() + "_log";
             try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + table_name)) {
@@ -149,7 +148,7 @@ public class AdministratorManager {
             }
         }
     }
-    
+
     public void updateLastSessionDate(Administrator admin) throws SQLException {
         if (Main.tableExists(admin.getName() + "_log")) {
             String table_name = admin.getName() + "_log";
@@ -164,5 +163,5 @@ public class AdministratorManager {
             }
         }
     }
-    
+
 }

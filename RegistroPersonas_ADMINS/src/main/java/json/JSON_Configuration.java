@@ -38,10 +38,6 @@ public class JSON_Configuration {
                         ex.printStackTrace();
                     }
                 }
-                this.session_directory = new File(this.getMain_directory().getAbsolutePath() + "\\sessions\\");
-                if (!this.session_directory.exists()) {
-                    if (this.session_directory.mkdir());
-                }
             }
         } else {
             this.json_file_mysql = new File(this.getMain_directory().getAbsolutePath() + "\\mysql_config.json");

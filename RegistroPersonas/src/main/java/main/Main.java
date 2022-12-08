@@ -94,7 +94,7 @@ public class Main {
                                 }
                             }
                         } else {
-                            JOptionPane.showMessageDialog(null, "No se encontraron administradores en la base de datos, por favot ejecutar la aplicacion de registro de administradores y registrar al menos 1.", "Administradores", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "No se encontraron administradores en la base de datos, por favor ejecutar la aplicacion de registro de administradores y registrar al menos 1.", "Administradores", JOptionPane.ERROR_MESSAGE);
                             System.exit(0);
                         }
                     }

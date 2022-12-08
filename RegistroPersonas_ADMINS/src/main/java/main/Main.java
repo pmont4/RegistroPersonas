@@ -1,5 +1,6 @@
 package main;
 
+import frames.Main_Frame;
 import frames.MySQLConfig_Frame;
 import java.io.IOException;
 import java.sql.Connection;
@@ -20,6 +21,8 @@ public class Main {
     private static JSON_Configuration json;
     
     private static AdministratorManager adminManager;
+    
+    private static Main_Frame mainFrame;
     
     public static void main(String[] args) {
         json = new JSON_Configuration();
@@ -49,6 +52,9 @@ public class Main {
                     try (PreparedStatement stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS administrators (name VARCHAR(32) NOT NULL, mail VARCHAR(60) NOT NULL, password VARCHAR(16) NOT NULL, address TEXT, perms VARCHAR(18) NOT NULL, PRIMARY KEY(mail))")) {
                         stmt.execute();
                         adminManager = new AdministratorManager();
+                        
+                        mainFrame = new Main_Frame();
+                        mainFrame.setVisible(true);
                     }
                 } else {
                     MySQLConfig_Frame mysqlconfig = new MySQLConfig_Frame();
@@ -73,6 +79,10 @@ public class Main {
     
     public static AdministratorManager getAdministratorManager() {
         return adminManager;
+    }
+    
+    public static Main_Frame getMain_Frame() {
+        return mainFrame;
     }
     
     public static String formatDate(LocalDateTime date) {
