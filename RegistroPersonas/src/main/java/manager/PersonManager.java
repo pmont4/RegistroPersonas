@@ -55,7 +55,7 @@ public class PersonManager {
         }
     }
 
-    public void deletePerson(int id) throws SQLException {
+    public boolean deletePerson(int id) throws SQLException {
         PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM people WHERE id=?");
         stmt.setInt(1, id);
         try (ResultSet rs = stmt.executeQuery()) {
@@ -69,8 +69,11 @@ public class PersonManager {
                     stmt.close();
                     this.getPerson_list().remove(person);
                 }
+                return opt.isPresent();
             }
         }
+        
+        return false;
     }
 
     public int getPersonAge(Person person) {

@@ -1,8 +1,8 @@
 package frames;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
@@ -105,26 +105,18 @@ public class DeletePerson_Frame extends javax.swing.JInternalFrame {
             if (!this.containLetters(this.idField.getText())) {
                 try {
                     int id = Integer.parseInt(this.idField.getText());
-                    try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM people WHERE id=?")) {
-                        stmt.setInt(1, id);
-                        try (ResultSet rs = stmt.executeQuery()) {
-                            if (rs.next()) {
-                                Main.getPersonManager().deletePerson(id);
-
-                                JOptionPane.showMessageDialog(null, "El ID " + id + " fue correctamente removido de la base de datos.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
-                                Main.getMain_frame().clearRowsInTable();
-                                Main.getMain_frame().fillTable_People(Main.getPersonManager().getPerson_list());
-
-                                this.idField.setText("");
-                            } else {
-                                JOptionPane.showMessageDialog(null, "El ID " + id + " no fue encontrado en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);
-                                this.idField.setText("");
-                            }
-                        }
+                    if (Main.getPersonManager().deletePerson(id)) {
+                        JOptionPane.showMessageDialog(null, "El ID " + id + " fue correctamente eliminado de la base de datos.");
+                        
+                        Main.getMain_frame().clearRowsInTable();
+                        Main.getMain_frame().fillTable_People(Main.getPersonManager().getPerson_list());
+                        this.idField.setText("");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "El ID " + id + " no fue encontrado en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);
+                        this.idField.setText("");
                     }
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
+                    Logger.getLogger(DeletePerson_Frame.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
