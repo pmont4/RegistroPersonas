@@ -3,6 +3,7 @@ package frames;
 import entities.Person;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.JFrame;
@@ -14,7 +15,7 @@ import main.Main;
 import utils.PeopleTableFilters;
 
 public class Main_Frame extends javax.swing.JFrame {
-    
+
     @Getter
     private final PeopleTableFilters filters;
 
@@ -24,7 +25,7 @@ public class Main_Frame extends javax.swing.JFrame {
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+
         this.filters = new PeopleTableFilters();
 
         this.fillTable_People(Main.getPersonManager().getPerson_list());
@@ -65,7 +66,28 @@ public class Main_Frame extends javax.swing.JFrame {
             data[1] = p.getName();
             data[2] = p.getBirth_date();
             data[3] = Main.getPersonManager().getPersonAge(p);
-            data[4] = p.getHeight().replace("-", "");
+            if (!p.getHeight().equals("None")) {
+                String string_height = "";
+                
+                String[] split = p.getHeight().split("\\-");
+                switch (split[1]) {
+                    case "cm": {
+                        double ft = (Double.parseDouble(split[0]) / 30.48);
+                        BigDecimal height = new BigDecimal(ft);
+                        string_height = p.getHeight().replace("-", "") + " (" + height.setScale(2, BigDecimal.ROUND_HALF_UP) + "ft)";
+                        break;
+                    }
+                    case "ft": {
+                        double cm = (Double.parseDouble(split[0]) * 30.48);
+                        BigDecimal height = new BigDecimal(cm);
+                        string_height = p.getHeight().replace("-", "") + " (" + height.setScale(1, BigDecimal.ROUND_HALF_UP) + "cm)";
+                        break;
+                    }
+                }
+                data[4] = string_height;
+            } else {
+                data[4] = "None";
+            }
             switch (p.getGender()) {
                 case 'M': {
                     data[5] = "Masculino";
@@ -339,7 +361,7 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_addPersonMenuItemActionPerformed
 
     private void adultFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adultFilterMenuItemActionPerformed
-       if (!this.getFilters().filterAge("adult").isEmpty()) {
+        if (!this.getFilters().filterAge("adult").isEmpty()) {
             this.clearRowsInTable();
             this.fillTable_People(this.getFilters().filterAge("adult"));
             this.hasFilterApplied = true;
@@ -380,7 +402,7 @@ public class Main_Frame extends javax.swing.JFrame {
             this.clearRowsInTable();
             this.fillTable_People(this.getFilters().filterHeightPeople("taller"));
             this.hasFilterApplied = true;
-        }  else {
+        } else {
             JOptionPane.showMessageDialog(null, "No se encontro gente alta en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_tallerPeopleFilterMenuItemActionPerformed
@@ -390,7 +412,7 @@ public class Main_Frame extends javax.swing.JFrame {
             this.clearRowsInTable();
             this.fillTable_People(this.getFilters().filterHeightPeople("smaller"));
             this.hasFilterApplied = true;
-        }  else {
+        } else {
             JOptionPane.showMessageDialog(null, "No se encontro gente baja en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_smallerPeopleFilterMenuItemActionPerformed

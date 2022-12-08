@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Optional;
 import lombok.Getter;
@@ -17,13 +16,9 @@ public class PersonManager {
     @Getter
     private LinkedList<Person> person_list;
 
-    @Getter
-    private HashMap<Person, Integer> ageMap;
-
     public PersonManager() {
         try {
             this.person_list = new LinkedList<>();
-            this.ageMap = new HashMap<>();
 
             init();
             System.out.println(this.getPerson_list());
@@ -57,7 +52,6 @@ public class PersonManager {
             Person person = new Person(0, name, birth_date, height, gender);
 
             this.getPerson_list().add(person);
-            this.getAgeMap().put(person, this.getPersonAge(person));
         }
     }
 
@@ -70,9 +64,6 @@ public class PersonManager {
                 stmt.executeUpdate();
 
                 this.getPerson_list().remove(person);
-                if (this.getAgeMap().containsKey(person)) {
-                    this.getAgeMap().remove(person);
-                }
             }
         }
     }
@@ -96,7 +87,6 @@ public class PersonManager {
                     Person person = new Person(rs.getInt("id"), rs.getString("name"), rs.getString("birth_date"), rs.getString("height"), rs.getString("gender").charAt(0));
 
                     this.getPerson_list().add(person);
-                    this.getAgeMap().put(person, this.getPersonAge(person));
                 }
             }
         }

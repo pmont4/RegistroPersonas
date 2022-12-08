@@ -3,7 +3,6 @@ package utils;
 import entities.Person;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import main.Main;
 
 public class PeopleTableFilters {
@@ -14,24 +13,22 @@ public class PeopleTableFilters {
     public List<Person> filterAge(String age_limit) {
         List<Person> toReturn = new ArrayList<>();
 
-        if (!Main.getPersonManager().getAgeMap().isEmpty()) {
-            for (Map.Entry<Person, Integer> map : Main.getPersonManager().getAgeMap().entrySet()) {
-                switch (age_limit) {
-                    case "adult": {
-                        if (map.getValue() >= 18) {
-                            toReturn.add(map.getKey());
-                        }
-                        break;
+        Main.getPersonManager().getPerson_list().forEach(p -> {
+            switch (age_limit) {
+                case "adult": {
+                    if (Main.getPersonManager().getPersonAge(p) >= 18) {
+                        toReturn.add(p);
                     }
-                    case "young": {
-                        if (map.getValue() < 18) {
-                            toReturn.add(map.getKey());
-                        }
-                        break;
+                    break;
+                }
+                case "young": {
+                    if (Main.getPersonManager().getPersonAge(p) < 18) {
+                        toReturn.add(p);
                     }
+                    break;
                 }
             }
-        }
+        });
 
         return toReturn;
     }
@@ -55,7 +52,7 @@ public class PeopleTableFilters {
                                 }
                                 case "ft": {
                                     double height = Double.parseDouble(split[0]);
-                                    if(height >= 5.10) {
+                                    if (height >= 5.90) {
                                         toReturn.add(p);
                                     }
                                     break;
@@ -75,7 +72,7 @@ public class PeopleTableFilters {
                                 }
                                 case "ft": {
                                     double height = Double.parseDouble(split[0]);
-                                    if(height < 5.10) {
+                                    if (height < 5.90) {
                                         toReturn.add(p);
                                     }
                                     break;
