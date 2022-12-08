@@ -44,10 +44,45 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
         return (!(day && month && year));
     }
 
+    private boolean checkLettersInHeightField() {
+        boolean hasLetters = false;
+        for (int i = 0; i < this.heightField.getText().length(); i++) {
+            char c = this.heightField.getText().charAt(i);
+            if (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ' ')) {
+                hasLetters = true;
+            }
+        }
+        return !hasLetters;
+    }
+
     private boolean containsNumbers(String s) {
         Pattern p = Pattern.compile("([0-9])");
         Matcher m = p.matcher(s);
         return m.find();
+    }
+
+    private String buildHeight(String height, int unit) {
+        StringBuilder sb = new StringBuilder();
+
+        switch (unit) {
+            case 0: {
+                int num = Integer.parseInt(height);
+                if (num > 0) {
+                    sb.append(num).append("-").append("cm");
+                }
+                break;
+            }
+            case 1: {
+                if (height.length() <= 4) {
+                    double num_f = Double.parseDouble(height);
+                    if (num_f > 1.00) {
+                        sb.append(num_f).append("-").append("ft");
+                    }
+                }
+                break;
+            }
+        }
+        return sb.toString();
     }
 
     private void registerPerson() throws SQLException {
@@ -79,36 +114,21 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                             }
                         }
 
-                        String height;
+                        String height = "None";
+
                         if (!this.heightField.getText().isEmpty()) {
-                            if (this.heightField.getText().length() <= 6) {
-                                if (this.heightField.getText().contains("cm") || this.heightField.getText().contains("ft")) {
-                                    height = this.heightField.getText();
-
-                                    Main.getPersonManager().createPerson(name, date, height, gender);
-
-                                    JOptionPane.showMessageDialog(null, "La persona " + name + " fue correctamente registrada.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
-
-                                    Main.getMain_frame().clearRowsInTable();
-                                    Main.getMain_frame().fillTable_People();
-                                    this.clear();
-                                } else {
-                                    JOptionPane.showMessageDialog(null, "La altura ingresada no es valida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-                                }
-                            } else {
-                                JOptionPane.showMessageDialog(null, "La altura ingresada no es valida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                            if (this.checkLettersInHeightField()) {
+                                height = this.buildHeight(this.heightField.getText(), this.measurementUnitComboBox.getSelectedIndex());
                             }
-                        } else {
-                            height = "None";
-
-                            Main.getPersonManager().createPerson(name, date, height, gender);
-
-                            JOptionPane.showMessageDialog(null, "La persona " + name + " fue correctamente registrada.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
-
-                            Main.getMain_frame().clearRowsInTable();
-                            Main.getMain_frame().fillTable_People();
-                            this.clear();
                         }
+
+                        Main.getPersonManager().createPerson(name, date, height, gender);
+
+                        JOptionPane.showMessageDialog(null, "La persona " + name + " fue correctamente registrada.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
+
+                        Main.getMain_frame().clearRowsInTable();
+                        Main.getMain_frame().fillTable_People(Main.getPersonManager().getPerson_list());
+                        this.clear();
                     } else {
                         JOptionPane.showMessageDialog(null, "La fecha introducida no es valida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
                     }
@@ -156,6 +176,7 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
         heightField = new javax.swing.JTextField();
         genderLabel = new javax.swing.JLabel();
         genderComboBox = new javax.swing.JComboBox<>();
+        measurementUnitComboBox = new javax.swing.JComboBox<>();
         saveButton = new javax.swing.JButton();
         clearButton = new javax.swing.JButton();
 
@@ -193,13 +214,16 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
         heightLabel.setText("Altura:");
 
         heightField.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
-        heightField.setToolTipText("Ejemplo: 160cm o 5,9ft");
+        heightField.setToolTipText("Ejemplo: 160cm o 5.9ft");
 
         genderLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         genderLabel.setText("Genero:");
 
         genderComboBox.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         genderComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Masculino", "Femenino", "No especifico", " " }));
+
+        measurementUnitComboBox.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        measurementUnitComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "cm", "ft" }));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -230,8 +254,11 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                                     .addComponent(jLabel5)
                                     .addGap(0, 0, Short.MAX_VALUE))
                                 .addComponent(yearField))))
-                    .addComponent(heightField, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(genderComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(genderComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(heightField, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(measurementUnitComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -255,7 +282,8 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(heightLabel)
-                    .addComponent(heightField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(heightField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(measurementUnitComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(genderLabel)
@@ -311,7 +339,7 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         try {
             if (!this.nameField.getText().isEmpty()) {
-                try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM persons WHERE name=?")) {
+                try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM people WHERE name=?")) {
                     stmt.setString(1, this.nameField.getText());
                     try (ResultSet rs = stmt.executeQuery()) {
                         if (!rs.next()) {
@@ -348,6 +376,7 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JComboBox<String> measurementUnitComboBox;
     private javax.swing.JTextField monthField;
     private javax.swing.JTextField nameField;
     private javax.swing.JLabel nameLabel;

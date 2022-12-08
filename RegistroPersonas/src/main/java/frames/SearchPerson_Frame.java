@@ -27,7 +27,7 @@ public class SearchPerson_Frame extends javax.swing.JInternalFrame {
 
             @Override
             public void internalFrameClosed(InternalFrameEvent e) {
-                Main.getMain_frame().fillTable_People();
+                Main.getMain_frame().fillTable_People(Main.getPersonManager().getPerson_list());
             }
 
             @Override

@@ -46,7 +46,7 @@ public class PersonManager {
     }
 
     public void createPerson(String name, String birth_date, String height, char gender) throws SQLException {
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO persons (id, name, birth_date, height, gender) VALUES (?,?,?,?,?)")) {
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO people (id, name, birth_date, height, gender) VALUES (?,?,?,?,?)")) {
             stmt.setInt(1, 0);
             stmt.setString(2, name);
             stmt.setString(3, birth_date);
@@ -65,7 +65,7 @@ public class PersonManager {
         Optional<Person> person_o = this.getPerson(name);
         if (person_o.isPresent()) {
             Person person = person_o.get();
-            try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("DELETE FROM persons WHERE name=?")) {
+            try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("DELETE FROM people WHERE name=?")) {
                 stmt.setString(1, person.getName());
                 stmt.executeUpdate();
 
@@ -90,7 +90,7 @@ public class PersonManager {
     }
 
     synchronized void init() throws SQLException {
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM persons")) {
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM people")) {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Person person = new Person(rs.getInt("id"), rs.getString("name"), rs.getString("birth_date"), rs.getString("height"), rs.getString("gender").charAt(0));

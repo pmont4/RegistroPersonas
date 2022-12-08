@@ -1,8 +1,10 @@
 package frames;
 
+import entities.Person;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -25,7 +27,7 @@ public class Main_Frame extends javax.swing.JFrame {
         
         this.filters = new PeopleTableFilters();
 
-        this.fillTable_People();
+        this.fillTable_People(Main.getPersonManager().getPerson_list());
 
         this.addWindowListener(new WindowAdapter() {
 
@@ -48,22 +50,22 @@ public class Main_Frame extends javax.swing.JFrame {
     }
 
     public TableModel getPeopleTableModel() {
-        return this.personsTable.getModel();
+        return this.peopleTable.getModel();
     }
 
     public void updateTableModel(TableModel model) {
-        this.personsTable.setModel(model);
+        this.peopleTable.setModel(model);
     }
 
-    public void fillTable_People() {
-        Object[] data = new Object[this.personsTable.getColumnCount()];
-        DefaultTableModel newModel = (DefaultTableModel) this.personsTable.getModel();
-        Main.getPersonManager().getPerson_list().forEach(p -> {
+    public void fillTable_People(List<Person> list) {
+        Object[] data = new Object[this.peopleTable.getColumnCount()];
+        DefaultTableModel newModel = (DefaultTableModel) this.peopleTable.getModel();
+        list.forEach(p -> {
             data[0] = p.getId();
             data[1] = p.getName();
             data[2] = p.getBirth_date();
             data[3] = Main.getPersonManager().getPersonAge(p);
-            data[4] = p.getHeight();
+            data[4] = p.getHeight().replace("-", "");
             switch (p.getGender()) {
                 case 'M': {
                     data[5] = "Masculino";
@@ -83,13 +85,13 @@ public class Main_Frame extends javax.swing.JFrame {
             newModel.addRow(data);
         });
 
-        this.personsTable.setModel(newModel);
+        this.peopleTable.setModel(newModel);
     }
 
     public void clearRowsInTable() {
-        DefaultTableModel model = (DefaultTableModel) this.personsTable.getModel();
+        DefaultTableModel model = (DefaultTableModel) this.peopleTable.getModel();
         model.setRowCount(0);
-        this.personsTable.setModel(model);
+        this.peopleTable.setModel(model);
     }
 
     @SuppressWarnings("unchecked")
@@ -100,7 +102,7 @@ public class Main_Frame extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        personsTable = new javax.swing.JTable();
+        peopleTable = new javax.swing.JTable();
         jMenuBar1 = new javax.swing.JMenuBar();
         optionsMenu = new javax.swing.JMenu();
         closeSessionMenuItem = new javax.swing.JMenuItem();
@@ -111,6 +113,8 @@ public class Main_Frame extends javax.swing.JFrame {
         filtersMenu = new javax.swing.JMenu();
         adultFilterMenuItem = new javax.swing.JMenuItem();
         youngerPeopleFilterMenuItem = new javax.swing.JMenuItem();
+        tallerPeopleFilterMenuItem = new javax.swing.JMenuItem();
+        smallerPeopleFilterMenuItem = new javax.swing.JMenuItem();
         removeFiltersMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -140,8 +144,8 @@ public class Main_Frame extends javax.swing.JFrame {
                 .addGap(36, 36, 36))
         );
 
-        personsTable.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
-        personsTable.setModel(new javax.swing.table.DefaultTableModel(
+        peopleTable.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        peopleTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -164,7 +168,7 @@ public class Main_Frame extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(personsTable);
+        jScrollPane1.setViewportView(peopleTable);
 
         mainPane.setLayer(jPanel1, javax.swing.JLayeredPane.DEFAULT_LAYER);
         mainPane.setLayer(jScrollPane1, javax.swing.JLayeredPane.DEFAULT_LAYER);
@@ -261,6 +265,24 @@ public class Main_Frame extends javax.swing.JFrame {
         });
         filtersMenu.add(youngerPeopleFilterMenuItem);
 
+        tallerPeopleFilterMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_3, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        tallerPeopleFilterMenuItem.setText("Filtrar personas altas");
+        tallerPeopleFilterMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tallerPeopleFilterMenuItemActionPerformed(evt);
+            }
+        });
+        filtersMenu.add(tallerPeopleFilterMenuItem);
+
+        smallerPeopleFilterMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_4, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        smallerPeopleFilterMenuItem.setText("Filtrar personas bajas");
+        smallerPeopleFilterMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                smallerPeopleFilterMenuItemActionPerformed(evt);
+            }
+        });
+        filtersMenu.add(smallerPeopleFilterMenuItem);
+
         removeFiltersMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         removeFiltersMenuItem.setText("Remover filtros");
         removeFiltersMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -317,38 +339,9 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_addPersonMenuItemActionPerformed
 
     private void adultFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adultFilterMenuItemActionPerformed
-        Object[] data = new Object[this.getPeopleTableModel().getColumnCount()];
-        DefaultTableModel model = (DefaultTableModel) this.getPeopleTableModel();
-        
-        if (!this.getFilters().filterAge("adult").isEmpty()) {
+       if (!this.getFilters().filterAge("adult").isEmpty()) {
             this.clearRowsInTable();
-            
-            this.getFilters().filterAge("adult").forEach(p -> {
-                data[0] = p.getId();
-                data[1] = p.getName();
-                data[2] = p.getBirth_date();
-                data[3] = Main.getPersonManager().getPersonAge(p);
-                data[4] = p.getHeight();
-                switch (p.getGender()) {
-                    case 'M':{
-                        data[5] = "Masculino";
-                        break;
-                    }
-                    case 'F':{
-                        data[5] = "Femenino";
-                        break;
-                    }
-                    case 'N':
-                    default:{
-                        data[5] = "No especificado";
-                        break;
-                    }
-                }
-                
-                model.addRow(data);
-            });
-            
-            this.updateTableModel(model);
+            this.fillTable_People(this.getFilters().filterAge("adult"));
             this.hasFilterApplied = true;
         } else {
             JOptionPane.showMessageDialog(null, "Ningun adulto fue encontrado en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
@@ -356,38 +349,9 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_adultFilterMenuItemActionPerformed
 
     private void youngerPeopleFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_youngerPeopleFilterMenuItemActionPerformed
-        Object[] data = new Object[this.getPeopleTableModel().getColumnCount()];
-        DefaultTableModel model = (DefaultTableModel) this.getPeopleTableModel();
-        
         if (!this.getFilters().filterAge("young").isEmpty()) {
             this.clearRowsInTable();
-            
-            this.getFilters().filterAge("young").forEach(p -> {
-                data[0] = p.getId();
-                data[1] = p.getName();
-                data[2] = p.getBirth_date();
-                data[3] = Main.getPersonManager().getPersonAge(p);
-                data[4] = p.getHeight();
-                switch (p.getGender()) {
-                    case 'M':{
-                        data[5] = "Masculino";
-                        break;
-                    }
-                    case 'F':{
-                        data[5] = "Femenino";
-                        break;
-                    }
-                    case 'N':
-                    default:{
-                        data[5] = "No especificado";
-                        break;
-                    }
-                }
-                
-                model.addRow(data);
-            });
-            
-            this.updateTableModel(model);
+            this.fillTable_People(this.getFilters().filterAge("young"));
             this.hasFilterApplied = true;
         } else {
             JOptionPane.showMessageDialog(null, "Ningun menor de edad fue encontrado en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
@@ -397,7 +361,7 @@ public class Main_Frame extends javax.swing.JFrame {
     private void removeFiltersMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeFiltersMenuItemActionPerformed
         if (this.hasFilterApplied) {
             this.clearRowsInTable();
-            this.fillTable_People();
+            this.fillTable_People(Main.getPersonManager().getPerson_list());
 
             this.hasFilterApplied = false;
         } else {
@@ -411,6 +375,26 @@ public class Main_Frame extends javax.swing.JFrame {
         search.show();
     }//GEN-LAST:event_searchPersonMenuItemActionPerformed
 
+    private void tallerPeopleFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tallerPeopleFilterMenuItemActionPerformed
+        if (!this.getFilters().filterHeightPeople("taller").isEmpty()) {
+            this.clearRowsInTable();
+            this.fillTable_People(this.getFilters().filterHeightPeople("taller"));
+            this.hasFilterApplied = true;
+        }  else {
+            JOptionPane.showMessageDialog(null, "No se encontro gente alta en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_tallerPeopleFilterMenuItemActionPerformed
+
+    private void smallerPeopleFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_smallerPeopleFilterMenuItemActionPerformed
+        if (!this.getFilters().filterHeightPeople("smaller").isEmpty()) {
+            this.clearRowsInTable();
+            this.fillTable_People(this.getFilters().filterHeightPeople("smaller"));
+            this.hasFilterApplied = true;
+        }  else {
+            JOptionPane.showMessageDialog(null, "No se encontro gente baja en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_smallerPeopleFilterMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addPersonMenuItem;
     private javax.swing.JMenuItem adultFilterMenuItem;
@@ -423,10 +407,12 @@ public class Main_Frame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JDesktopPane mainPane;
     private javax.swing.JMenu optionsMenu;
+    private javax.swing.JTable peopleTable;
     private javax.swing.JMenu personsMenu;
-    private javax.swing.JTable personsTable;
     private javax.swing.JMenuItem removeFiltersMenuItem;
     private javax.swing.JMenuItem searchPersonMenuItem;
+    private javax.swing.JMenuItem smallerPeopleFilterMenuItem;
+    private javax.swing.JMenuItem tallerPeopleFilterMenuItem;
     private javax.swing.JMenuItem youngerPeopleFilterMenuItem;
     // End of variables declaration//GEN-END:variables
 

@@ -68,7 +68,7 @@ public class Main {
                 if (getMySQLConnection() != null && !getMySQLConnection().isClosed()) {
                     PreparedStatement stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS administrators (name VARCHAR(32) NOT NULL, mail VARCHAR(60) NOT NULL, password VARCHAR(16) NOT NULL, address TEXT, perms VARCHAR(18) NOT NULL, PRIMARY KEY(mail))");
                     stmt.execute();
-                    stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS persons (id INT NOT NULL AUTO_INCREMENT, name varchar(45) NOT NULL, birth_date VARCHAR(45) NOT NULL, height VARCHAR(20), gender VARCHAR(1), PRIMARY KEY(id))");
+                    stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS people (id INT NOT NULL AUTO_INCREMENT, name varchar(45) NOT NULL, birth_date VARCHAR(45) NOT NULL, height VARCHAR(22), gender VARCHAR(1), PRIMARY KEY(id))");
                     stmt.execute();
                     stmt.close();
                     
