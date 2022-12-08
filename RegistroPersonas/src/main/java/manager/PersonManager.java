@@ -55,15 +55,20 @@ public class PersonManager {
         }
     }
 
-    public void deletePerson(String name) throws SQLException {
-        Optional<Person> person_o = this.getPerson(name);
-        if (person_o.isPresent()) {
-            Person person = person_o.get();
-            try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("DELETE FROM people WHERE name=?")) {
-                stmt.setString(1, person.getName());
-                stmt.executeUpdate();
-
-                this.getPerson_list().remove(person);
+    public void deletePerson(int id) throws SQLException {
+        PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM people WHERE id=?");
+        stmt.setInt(1, id);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                Optional<Person> opt = this.getPerson(rs.getString("name"));
+                if (opt.isPresent()) {
+                    Person person = opt.get();
+                    stmt = Main.getMySQLConnection().prepareStatement("DELETE FROM people WHERE id=?");
+                    stmt.setInt(1, person.getId());
+                    stmt.execute();
+                    stmt.close();
+                    this.getPerson_list().remove(person);
+                }
             }
         }
     }

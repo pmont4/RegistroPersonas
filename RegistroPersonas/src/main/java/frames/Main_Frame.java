@@ -131,6 +131,7 @@ public class Main_Frame extends javax.swing.JFrame {
         exitMenuItem = new javax.swing.JMenuItem();
         personsMenu = new javax.swing.JMenu();
         addPersonMenuItem = new javax.swing.JMenuItem();
+        removePersonMenuItem = new javax.swing.JMenuItem();
         searchPersonMenuItem = new javax.swing.JMenuItem();
         filtersMenu = new javax.swing.JMenu();
         adultFilterMenuItem = new javax.swing.JMenuItem();
@@ -257,6 +258,16 @@ public class Main_Frame extends javax.swing.JFrame {
         });
         personsMenu.add(addPersonMenuItem);
 
+        removePersonMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        removePersonMenuItem.setText("Borrar persona");
+        removePersonMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removePersonMenuItemActionPerformed(evt);
+            }
+        });
+        personsMenu.add(removePersonMenuItem);
+
+        searchPersonMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         searchPersonMenuItem.setText("Mostar persona");
         searchPersonMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -417,6 +428,16 @@ public class Main_Frame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_smallerPeopleFilterMenuItemActionPerformed
 
+    private void removePersonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removePersonMenuItemActionPerformed
+        if (Main.getAdministratorOnline().getPerms().contains("remove")) {
+            DeletePerson_Frame delete = new DeletePerson_Frame();
+            this.mainPane.add(delete);
+            delete.show();
+        } else {
+            JOptionPane.showMessageDialog(null, "No tienes permisos para abrir esta ventana.", "Permisos insuficientes", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_removePersonMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addPersonMenuItem;
     private javax.swing.JMenuItem adultFilterMenuItem;
@@ -432,6 +453,7 @@ public class Main_Frame extends javax.swing.JFrame {
     private javax.swing.JTable peopleTable;
     private javax.swing.JMenu personsMenu;
     private javax.swing.JMenuItem removeFiltersMenuItem;
+    private javax.swing.JMenuItem removePersonMenuItem;
     private javax.swing.JMenuItem searchPersonMenuItem;
     private javax.swing.JMenuItem smallerPeopleFilterMenuItem;
     private javax.swing.JMenuItem tallerPeopleFilterMenuItem;
