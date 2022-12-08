@@ -125,29 +125,34 @@ public class AdministratorManager {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
-                    this.updateLogAdmin(a);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
-    private void updateLogAdmin(Administrator admin) throws SQLException {
+    
+    public void submitLog(Administrator admin, String info) throws SQLException {
         if (this.tableExists(admin.getName() + "_log")) {
-            try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + admin.getName() + "_log WHERE date=?")) {
-                stmt.setString(1, Main.formatDate(LocalDateTime.now()));
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        if (rs.getString("log").contains(",")) {
-                            String[] split = rs.getString("log").split(",");
-                            admin.setLogger(Arrays.asList(split));
-                        } else {
-                            admin.setLogger(Arrays.asList(rs.getString("log")));
-                        }
-                    } else {
-                        admin.setLogger(new ArrayList<>());
+            PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + admin.getName() + "_log WHERE date=?");
+            stmt.setString(1, Main.formatDate(LocalDateTime.now()));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    if (!rs.getString("log").equals("")) {
+                        StringBuilder log_builder = new StringBuilder();
+                        String previous_log = rs.getString("log");
+                        log_builder.append(previous_log).append(", ").append(info);
+                        
+                        stmt = Main.getMySQLConnection().prepareStatement("UPDATE " + admin.getName() + "_log SET log=? WHERE date=?");
+                        stmt.setString(1, log_builder.toString());
+                        stmt.setString(2, Main.formatDate(LocalDateTime.now()));
+                        stmt.executeUpdate();
                     }
+                } else {
+                    stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO " + admin.getName() + "_log (date, log) VALUES (?,?)");
+                    stmt.setString(1, Main.formatDate(LocalDateTime.now()));
+                    stmt.setString(2, info);
+                    stmt.execute();
                 }
             }
         }

@@ -128,6 +128,8 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
 
                         Main.getMain_frame().clearRowsInTable();
                         Main.getMain_frame().fillTable_People(Main.getPersonManager().getPerson_list());
+                        Main.getAdministratorManager().submitLog(Main.getAdministratorOnline(), "Agrego a " + name + " a la base de datos");
+                        
                         this.clear();
                     } else {
                         JOptionPane.showMessageDialog(null, "La fecha introducida no es valida.", "Advertencia", JOptionPane.WARNING_MESSAGE);

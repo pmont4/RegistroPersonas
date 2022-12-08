@@ -110,6 +110,8 @@ public class DeletePerson_Frame extends javax.swing.JInternalFrame {
                         
                         Main.getMain_frame().clearRowsInTable();
                         Main.getMain_frame().fillTable_People(Main.getPersonManager().getPerson_list());
+                        Main.getAdministratorManager().submitLog(Main.getAdministratorOnline(), "Elimino el ID " + id + " de la base de datos");
+                        
                         this.idField.setText("");
                     } else {
                         JOptionPane.showMessageDialog(null, "El ID " + id + " no fue encontrado en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);
