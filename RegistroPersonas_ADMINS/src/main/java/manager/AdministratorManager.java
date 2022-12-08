@@ -123,7 +123,7 @@ public class AdministratorManager {
                         e.printStackTrace();
                     }
                     
-                    a.setLogger(this.getAdministratosLogger(a));
+                    this.updateAdministratosLogger(a);
                     this.updateLastSessionDate(a);
                 }
             }
@@ -133,7 +133,7 @@ public class AdministratorManager {
         } 
     }
     
-    public List<String> getAdministratosLogger(Administrator admin) throws SQLException {
+    public void updateAdministratosLogger(Administrator admin) throws SQLException {
         List<String> logger = new ArrayList<>();
         
         if (Main.tableExists(admin.getName() + "_log")) {
@@ -148,8 +148,6 @@ public class AdministratorManager {
                 }
             }
         }
-        
-        return !admin.getLogger().isEmpty() ? admin.getLogger() : new ArrayList<>();
     }
     
     public void updateLastSessionDate(Administrator admin) throws SQLException {
