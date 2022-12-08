@@ -1,7 +1,6 @@
 package frames;
 
 import entities.Person;
-import java.sql.SQLException;
 import java.util.Optional;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
@@ -17,10 +16,10 @@ public class SearchPerson_Frame extends javax.swing.JInternalFrame {
      */
     public SearchPerson_Frame() {
         initComponents();
-        
+
         this.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
         this.addInternalFrameListener(new InternalFrameListener() {
-            
+
             @Override
             public void internalFrameClosing(InternalFrameEvent e) {
                 Main.getMain_frame().clearRowsInTable();
@@ -33,6 +32,7 @@ public class SearchPerson_Frame extends javax.swing.JInternalFrame {
 
             @Override
             public void internalFrameOpened(InternalFrameEvent e) {
+                System.out.println(Main.getPersonManager().getPerson_list());
             }
 
             @Override
@@ -138,44 +138,40 @@ public class SearchPerson_Frame extends javax.swing.JInternalFrame {
 
     private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
         if (!this.namePersonField.getText().isEmpty()) {
+            String name = this.namePersonField.getText();
             DefaultTableModel newModel = (DefaultTableModel) Main.getMain_frame().getPeopleTableModel();
-            try {
-                Main.getMain_frame().clearRowsInTable();
-                
-                Optional<Person> opt = Main.getPersonManager().getPerson(this.namePersonField.getText());
-                if (opt.isPresent()) {
-                    Person person = opt.get();
-                    
-                    Object[] data = new Object[Main.getMain_frame().getPeopleTableModel().getColumnCount()];
-                    data[0] = person.getId();
-                    data[1] = person.getName();
-                    data[2] = person.getBirth_date();
-                    data[3] = Main.getPersonManager().getPersonAge(person);
-                    data[4] = person.getHeight();
-                    switch (person.getGender()) {
-                        case 'M': {
-                            data[5] = "Masculino";
-                            break;
-                        }
-                        case 'F': {
-                            data[5] = "Femenino";
-                            break;
-                        }
-                        case 'N':
-                        default: {
-                            data[5] = "No especificado";
-                            break;
-                        }
+            Main.getMain_frame().clearRowsInTable();
+
+            Optional<Person> opt = Main.getPersonManager().getPerson(name);
+            if (opt.isPresent()) {
+                Person person = opt.get();
+
+                Object[] data = new Object[Main.getMain_frame().getPeopleTableModel().getColumnCount()];
+                data[0] = person.getId();
+                data[1] = person.getName();
+                data[2] = person.getBirth_date();
+                data[3] = Main.getPersonManager().getPersonAge(person);
+                data[4] = person.getHeight();
+                switch (person.getGender()) {
+                    case 'M': {
+                        data[5] = "Masculino";
+                        break;
                     }
-                    newModel.addRow(data);
-                    
-                    Main.getMain_frame().updateTableModel(newModel);
-                } else {
-                    JOptionPane.showMessageDialog(null, "La persona no fue encontrada en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);
+                    case 'F': {
+                        data[5] = "Femenino";
+                        break;
+                    }
+                    case 'N':
+                    default: {
+                        data[5] = "No especificado";
+                        break;
+                    }
                 }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                newModel.addRow(data);
+
+                Main.getMain_frame().updateTableModel(newModel);
+            } else {
+                JOptionPane.showMessageDialog(null, "La persona no fue encontrada en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);
             }
         } else {
             JOptionPane.showMessageDialog(null, "Por favor, proporcione un nombre para mostrar los datos.", "Advertencia", JOptionPane.WARNING_MESSAGE);

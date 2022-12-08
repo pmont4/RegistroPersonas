@@ -1,17 +1,20 @@
 package frames;
 
-import entities.Person;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
-import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import lombok.Getter;
 import main.Main;
+import utils.PeopleTableFilters;
 
 public class Main_Frame extends javax.swing.JFrame {
+    
+    @Getter
+    private final PeopleTableFilters filters;
 
     public Main_Frame() {
         initComponents();
@@ -19,6 +22,8 @@ public class Main_Frame extends javax.swing.JFrame {
         this.setResizable(false);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        this.filters = new PeopleTableFilters();
 
         this.fillTable_People();
 
@@ -79,82 +84,6 @@ public class Main_Frame extends javax.swing.JFrame {
         });
 
         this.personsTable.setModel(newModel);
-    }
-
-    public void filterAge(String age_limit, String msg_filter_clear) {
-        int count = 0;
-        Object[] data = new Object[this.personsTable.getColumnCount()];
-        DefaultTableModel newModel = (DefaultTableModel) this.personsTable.getModel();
-        
-        this.clearRowsInTable();
-        for (Map.Entry<Person, Integer> map : Main.getPersonManager().getAgeMap().entrySet()) {
-            switch (age_limit) {
-                case "adult":{
-                    if (map.getValue() >= 18) {
-                        data[0] = map.getKey().getId();
-                        data[1] = map.getKey().getName();
-                        data[2] = map.getKey().getBirth_date();
-                        data[3] = map.getValue();
-                        data[4] = map.getKey().getHeight();
-                        switch (map.getKey().getGender()) {
-                            case 'M': {
-                                data[5] = "Masculino";
-                                break;
-                            }
-                            case 'F': {
-                                data[5] = "Femenino";
-                                break;
-                            }
-                            case 'N':
-                            default: {
-                                data[5] = "No especificado";
-                                break;
-                            }
-                        }
-
-                        count++;
-                        newModel.addRow(data);
-                    }
-                    break;
-                }
-                case "young":{
-                    if (map.getValue() < 18) {
-                        data[0] = map.getKey().getId();
-                        data[1] = map.getKey().getName();
-                        data[2] = map.getKey().getBirth_date();
-                        data[3] = map.getValue();
-                        data[4] = map.getKey().getHeight();
-                        switch (map.getKey().getGender()) {
-                            case 'M': {
-                                data[5] = "Masculino";
-                                break;
-                            }
-                            case 'F': {
-                                data[5] = "Femenino";
-                                break;
-                            }
-                            case 'N':
-                            default: {
-                                data[5] = "No especificado";
-                                break;
-                            }
-                        }
-
-                        count++;
-                        newModel.addRow(data);
-                    }
-                    break;
-                }
-            }
-        }
-
-        if (count == 0) {
-            this.fillTable_People();
-            JOptionPane.showMessageDialog(null, msg_filter_clear, "Filtros", JOptionPane.WARNING_MESSAGE);
-        } else {
-            this.updateTableModel(newModel);
-            this.hasFilterApplied = true;
-        }
     }
 
     public void clearRowsInTable() {
@@ -388,11 +317,81 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_addPersonMenuItemActionPerformed
 
     private void adultFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adultFilterMenuItemActionPerformed
-        this.filterAge("adult", "No se encontro ningun adulto en la base de datos.");
+        Object[] data = new Object[this.getPeopleTableModel().getColumnCount()];
+        DefaultTableModel model = (DefaultTableModel) this.getPeopleTableModel();
+        
+        if (!this.getFilters().filterAge("adult").isEmpty()) {
+            this.clearRowsInTable();
+            
+            this.getFilters().filterAge("adult").forEach(p -> {
+                data[0] = p.getId();
+                data[1] = p.getName();
+                data[2] = p.getBirth_date();
+                data[3] = Main.getPersonManager().getPersonAge(p);
+                data[4] = p.getHeight();
+                switch (p.getGender()) {
+                    case 'M':{
+                        data[5] = "Masculino";
+                        break;
+                    }
+                    case 'F':{
+                        data[5] = "Femenino";
+                        break;
+                    }
+                    case 'N':
+                    default:{
+                        data[5] = "No especificado";
+                        break;
+                    }
+                }
+                
+                model.addRow(data);
+            });
+            
+            this.updateTableModel(model);
+            this.hasFilterApplied = true;
+        } else {
+            JOptionPane.showMessageDialog(null, "Ningun adulto fue encontrado en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_adultFilterMenuItemActionPerformed
 
     private void youngerPeopleFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_youngerPeopleFilterMenuItemActionPerformed
-        this.filterAge("young", "No se encontro ningun menor en la base de datos.");
+        Object[] data = new Object[this.getPeopleTableModel().getColumnCount()];
+        DefaultTableModel model = (DefaultTableModel) this.getPeopleTableModel();
+        
+        if (!this.getFilters().filterAge("young").isEmpty()) {
+            this.clearRowsInTable();
+            
+            this.getFilters().filterAge("young").forEach(p -> {
+                data[0] = p.getId();
+                data[1] = p.getName();
+                data[2] = p.getBirth_date();
+                data[3] = Main.getPersonManager().getPersonAge(p);
+                data[4] = p.getHeight();
+                switch (p.getGender()) {
+                    case 'M':{
+                        data[5] = "Masculino";
+                        break;
+                    }
+                    case 'F':{
+                        data[5] = "Femenino";
+                        break;
+                    }
+                    case 'N':
+                    default:{
+                        data[5] = "No especificado";
+                        break;
+                    }
+                }
+                
+                model.addRow(data);
+            });
+            
+            this.updateTableModel(model);
+            this.hasFilterApplied = true;
+        } else {
+            JOptionPane.showMessageDialog(null, "Ningun menor de edad fue encontrado en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_youngerPeopleFilterMenuItemActionPerformed
 
     private void removeFiltersMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeFiltersMenuItemActionPerformed

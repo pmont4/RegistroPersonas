@@ -26,28 +26,16 @@ public class AdministratorManager {
         }
     }
 
-    public Optional<Administrator> getAdministrator(String name) throws SQLException {
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators WHERE name=?")) {
-            stmt.setString(1, name);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    if (this.getAdministrator_list().size() > 0) {
-                        for (Administrator a : this.getAdministrator_list()) {
-                            if (a.getName().equals(rs.getString("name"))) {
-                                return Optional.of(a);
-                            } else {
-                                return Optional.empty();
-                            }
-                        }
-                    } else {
-                        return Optional.empty();
-                    }
-                } else {
-                    return Optional.empty();
+    public Optional<Administrator> getAdministrator(String name) {
+        if (!this.getAdministrator_list().isEmpty()) {
+            for (Administrator a : this.getAdministrator_list()) {
+                if (a.getName().equalsIgnoreCase(name)) {
+                    return Optional.of(a);
                 }
             }
+        } else {
+            return Optional.empty();
         }
-
         return Optional.empty();
     }
 
