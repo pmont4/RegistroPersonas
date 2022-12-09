@@ -134,11 +134,29 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
 
                         if (!this.heightField.getText().isEmpty()) {
                             if (this.checkLettersInHeightField()) {
-                                height = this.buildHeight(this.heightField.getText(), this.measurementUnitComboBox.getSelectedIndex());
+                                switch (this.measurementUnitComboBox.getSelectedIndex()) {
+                                    case 0: {
+                                        height = this.buildHeight(this.heightField.getText(), this.measurementUnitComboBox.getSelectedIndex());
+                                        Main.getPersonManager().createPerson(name, date, height, gender);
+                                        break;
+                                    }
+                                    case 1: {
+                                        if (this.heightField.getText().contains(".")) {
+                                            height = this.buildHeight(this.heightField.getText(), this.measurementUnitComboBox.getSelectedIndex());
+                                            Main.getPersonManager().createPerson(name, date, height, gender);
+                                        } else {
+                                            JOptionPane.showMessageDialog(null, "La altura introducida no es valida.", "Altura", JOptionPane.WARNING_MESSAGE);
+                                        }
+                                        break;
+                                    }
+                                }
+                                
+                            } else {
+                                JOptionPane.showMessageDialog(null, "No se pueden introducir letras en el campo de la altura.", "Altura", JOptionPane.WARNING_MESSAGE);
                             }
+                        } else {
+                            Main.getPersonManager().createPerson(name, date, height, gender);
                         }
-
-                        Main.getPersonManager().createPerson(name, date, height, gender);
 
                         JOptionPane.showMessageDialog(null, "La persona " + name + " fue correctamente registrada.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
 

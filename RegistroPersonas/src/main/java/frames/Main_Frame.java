@@ -6,11 +6,14 @@ import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import lombok.Getter;
+import lombok.Setter;
 import main.Main;
 import utils.PeopleTableFilters;
 
@@ -19,8 +22,40 @@ public class Main_Frame extends javax.swing.JFrame {
     @Getter
     private final PeopleTableFilters filters;
 
+    @Getter
+    private CloseSession_Frame closeSessionInternal;
+
+    @Getter
+    private AddPerson_Frame addPersonInternal;
+
+    @Getter
+    private DeletePerson_Frame deletePersonInternal;
+
+    @Getter
+    private SearchPerson_Frame searchPersonInternal;
+
+    private void initInternalFrames() {
+        closeSessionInternal = new CloseSession_Frame();
+        this.mainPane.add(closeSessionInternal);
+        addPersonInternal = new AddPerson_Frame();
+        this.mainPane.add(addPersonInternal);
+        deletePersonInternal = new DeletePerson_Frame();
+        this.mainPane.add(deletePersonInternal);
+        searchPersonInternal = new SearchPerson_Frame();
+        this.mainPane.add(searchPersonInternal);
+    }
+
+    @Getter
+    @Setter
+    private boolean modifying;
+
+    @Getter
+    @Setter
+    private String modify;
+
     public Main_Frame() {
         initComponents();
+        this.initInternalFrames();
 
         this.setResizable(false);
         this.setLocationRelativeTo(null);
@@ -68,7 +103,7 @@ public class Main_Frame extends javax.swing.JFrame {
             data[3] = Main.getPersonManager().getPersonAge(p);
             if (!p.getHeight().equals("None")) {
                 String string_height = "";
-                
+
                 String[] split = p.getHeight().split("\\-");
                 switch (split[1]) {
                     case "cm": {
@@ -123,6 +158,7 @@ public class Main_Frame extends javax.swing.JFrame {
         mainPane = new javax.swing.JDesktopPane();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         peopleTable = new javax.swing.JTable();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -150,21 +186,31 @@ public class Main_Frame extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 3, 48)); // NOI18N
         jLabel1.setText("TABLA DE DATOS");
 
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
+        jLabel2.setText("(Personas)");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(215, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addGap(210, 210, 210))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap(363, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(524, 524, 524))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(347, 347, 347))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(38, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(36, 36, 36)
                 .addComponent(jLabel1)
-                .addGap(36, 36, 36))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2)
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         peopleTable.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
@@ -191,6 +237,14 @@ public class Main_Frame extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        peopleTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                peopleTableMouseClicked(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                peopleTableMouseReleased(evt);
+            }
+        });
         jScrollPane1.setViewportView(peopleTable);
 
         mainPane.setLayer(jPanel1, javax.swing.JLayeredPane.DEFAULT_LAYER);
@@ -202,10 +256,10 @@ public class Main_Frame extends javax.swing.JFrame {
             mainPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPaneLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(mainPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
-                .addContainerGap())
+                .addGroup(mainPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(11, Short.MAX_VALUE))
         );
         mainPaneLayout.setVerticalGroup(
             mainPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -214,7 +268,7 @@ public class Main_Frame extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(47, Short.MAX_VALUE))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
 
         jMenuBar1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -363,9 +417,7 @@ public class Main_Frame extends javax.swing.JFrame {
 
     private void addPersonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addPersonMenuItemActionPerformed
         if (Main.getAdministratorOnline().getPerms().contains("add")) {
-            AddPerson_Frame addperson = new AddPerson_Frame();
-            this.mainPane.add(addperson);
-            addperson.show();
+            this.getAddPersonInternal().show();
         } else {
             JOptionPane.showMessageDialog(null, "No tienes permisos para abrir esta ventana.", "Permisos insuficientes", JOptionPane.ERROR_MESSAGE);
         }
@@ -397,7 +449,7 @@ public class Main_Frame extends javax.swing.JFrame {
                 this.clearRowsInTable();
                 this.getFilters().removeFiltres();
                 this.fillTable_People(Main.getPersonManager().getPerson_list());
-                
+
                 this.hasFilterApplied = false;
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -409,9 +461,7 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_removeFiltersMenuItemActionPerformed
 
     private void searchPersonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchPersonMenuItemActionPerformed
-        SearchPerson_Frame search = new SearchPerson_Frame();
-        this.mainPane.add(search);
-        search.show();
+        this.getSearchPersonInternal().show();
     }//GEN-LAST:event_searchPersonMenuItemActionPerformed
 
     private void tallerPeopleFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tallerPeopleFilterMenuItemActionPerformed
@@ -436,13 +486,87 @@ public class Main_Frame extends javax.swing.JFrame {
 
     private void removePersonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removePersonMenuItemActionPerformed
         if (Main.getAdministratorOnline().getPerms().contains("remove")) {
-            DeletePerson_Frame delete = new DeletePerson_Frame();
-            this.mainPane.add(delete);
-            delete.show();
+            this.getDeletePersonInternal().show();
         } else {
             JOptionPane.showMessageDialog(null, "No tienes permisos para abrir esta ventana.", "Permisos insuficientes", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_removePersonMenuItemActionPerformed
+
+    private void peopleTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_peopleTableMouseClicked
+        int row = this.peopleTable.getSelectedRow();
+        int colum = this.peopleTable.getSelectedColumn();
+
+        if (row != -1) {
+            if (colum != 0) {
+                if (colum != 5) {
+                    if (colum != 3) {
+                        if (!this.isModifying()) {
+                            int id = Integer.parseInt(this.peopleTable.getValueAt(row, 0).toString());
+                            Object obj = this.peopleTable.getValueAt(row, colum);
+
+                            String property = obj.toString();
+                            Pattern letters = Pattern.compile("([a-z].*[A-Z])");
+                            Matcher m_letters = letters.matcher(property);
+
+                            Pattern nums = Pattern.compile("([0-9])");
+                            Matcher m_nums = nums.matcher(property);
+
+                            if (m_letters.find() && !m_nums.find()) {
+                                this.setModify("name");
+                            } else if (m_nums.find() && property.contains("-")) {
+                                this.setModify("birthdate");
+                            } else if (m_nums.find() && (property.contains("cm") || property.contains("ft"))) {
+                                this.setModify("height");
+                            }
+
+                            this.setModifying(true);
+
+                            switch (this.getModify()) {
+                                case "name": {
+                                    NameModifying_Frame name = new NameModifying_Frame();
+                                    name.setId(id);
+                                    name.setTitle("Modificar (ID: " + name.getId() + ")");
+                                    this.mainPane.add(name);
+                                    name.show();
+                                    break;
+                                }
+                                case "birthdate": {
+                                    BirthDateModifying_Frame birth_date = new BirthDateModifying_Frame();
+                                    birth_date.setId(id);
+                                    birth_date.setTitle("Modificar (ID: " + birth_date.getId() + ")");
+                                    this.mainPane.add(birth_date);
+                                    birth_date.show();
+                                    break;
+                                }
+                                case "height": {
+                                    HeightModifying_Frame height = new HeightModifying_Frame();
+                                    height.setId(id);
+                                    height.setTitle("Modificar (ID: " + height.getId() + ")");
+                                    this.mainPane.add(height);
+                                    height.show();
+                                    break;
+                                }
+                                
+                            }
+
+                        } else {
+                            JOptionPane.showMessageDialog(null, "No se pueden modificar dos atributos a la vez.", "Modificar", JOptionPane.WARNING_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "La edad no se puede modificar.", "Modificar", JOptionPane.WARNING_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "El genero no se puede modificar.", "Modificar", JOptionPane.WARNING_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "El ID no se puede modificar.", "Modificar", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_peopleTableMouseClicked
+
+    private void peopleTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_peopleTableMouseReleased
+
+    }//GEN-LAST:event_peopleTableMouseReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addPersonMenuItem;
@@ -451,6 +575,7 @@ public class Main_Frame extends javax.swing.JFrame {
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu filtersMenu;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;

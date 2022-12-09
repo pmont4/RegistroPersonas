@@ -146,36 +146,32 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                         HashMap<String, List<String>> loggerMap = this.getAdminLogMap().get(admin);
                         if (loggerMap != null) {
                             if (!loggerMap.isEmpty()) {
-                                for (Map.Entry<String, List<String>> map : loggerMap.entrySet()) {
-                                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                                    for (Map.Entry<String, List<String>> map : loggerMap.entrySet()) {
                                         for (String s : map.getValue()) {
                                             String log = s.trim();
                                             String toWrite = "Fecha: " + map.getKey() + "|- \t" + log + "." + "\n";
                                             writer.write(toWrite);
                                         }
-                                        writer.flush();
                                     }
+                                    writer.flush();
                                 }
                             }
                         }
                     }
                 } else {
                     HashMap<String, List<String>> loggerMap = this.getAdminLogMap().get(admin);
-                    BufferedWriter clean = new BufferedWriter(new FileWriter(file));
-                    clean.write("");
-                    clean.flush();
-                    clean.close();
                     if (loggerMap != null) {
                         if (!loggerMap.isEmpty()) {
-                            for (Map.Entry<String, List<String>> map : loggerMap.entrySet()) {
-                                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                                for (Map.Entry<String, List<String>> map : loggerMap.entrySet()) {
                                     for (String s : map.getValue()) {
                                         String log = s.trim();
                                         String toWrite = "Fecha: " + map.getKey() + "|- \t" + log + "." + "\n";
                                         writer.write(toWrite);
                                     }
-                                    writer.flush();
                                 }
+                                writer.flush();
                             }
                         }
                     }

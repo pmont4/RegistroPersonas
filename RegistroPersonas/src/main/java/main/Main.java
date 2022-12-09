@@ -72,8 +72,6 @@ public class Main {
                     
                     administratorManager = new AdministratorManager();
                     personManager = new PersonManager();
-          
-                    main_frame = new Main_Frame();
 
                     stmt = getMySQLConnection().prepareStatement("SELECT * FROM administrators");
                     try (ResultSet rs = stmt.executeQuery()) {
@@ -87,6 +85,7 @@ public class Main {
                                     Administrator admin = opt.get();
                                     setAdministratorOnline(admin);
                                     
+                                    main_frame = new Main_Frame();
                                     main_frame.updateTitle("Registro personas (Administrador conectado: " + admin.getName() + ")");
                                     main_frame.setVisible(true);
                                 } else {
