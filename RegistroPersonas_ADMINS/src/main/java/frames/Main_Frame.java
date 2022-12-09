@@ -80,6 +80,7 @@ public class Main_Frame extends javax.swing.JFrame {
             }
             String perms = a.getPerms().toString().replace("[", "").replace("]", "").replace("add", "Agregar").replace("remove", "Remover").replace("modify", "Modificar") + ".";
             data[3] = perms;
+            data[4] = a.getLast_session();
             
             newModel.addRow(data);
         });
@@ -130,12 +131,12 @@ public class Main_Frame extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(170, 170, 170)
+                        .addGap(332, 332, 332)
                         .addComponent(jLabel1))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(320, 320, 320)
+                        .addGap(477, 477, 477)
                         .addComponent(jLabel2)))
-                .addContainerGap(188, Short.MAX_VALUE))
+                .addContainerGap(356, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -153,14 +154,14 @@ public class Main_Frame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Nombre", "Correo", "Direccion", "Permisos"
+                "Nombre", "Correo", "Direccion", "Permisos", "Ultima sesion"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
