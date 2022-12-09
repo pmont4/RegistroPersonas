@@ -94,7 +94,23 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                         String name = this.nameField.getText();
 
                         StringBuilder sb = new StringBuilder();
-                        sb.append(this.yearField.getText()).append("-").append(this.monthField.getText()).append("-").append(this.dayField.getText());
+                        String day_s = "";
+                        String month_s = "";
+                        if (day < 10) {
+                            if (this.dayField.getText().contains("0")) {
+                                day_s = this.dayField.getText();
+                            } else {
+                                day_s = "0" + this.dayField.getText();
+                            }
+                        }
+                        if (month < 10) {
+                            if (this.monthField.getText().contains("0")) {
+                                month_s = this.monthField.getText();
+                            } else {
+                                month_s = "0" + this.monthField.getText();
+                            }
+                        }
+                        sb.append(this.yearField.getText()).append("-").append(month_s).append("-").append(day_s);
                         String date = sb.toString();
 
                         char gender;
