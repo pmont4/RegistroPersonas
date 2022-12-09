@@ -7,10 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lombok.Getter;
 import main.Main;
 import utils.NoSpecifiedPermsException;
@@ -112,7 +109,7 @@ public class AdministratorManager {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     String newPass = rs.getString("password").replaceAll(".", "*");
-                    Administrator admin = new Administrator(rs.getString("name"), rs.getString("mail"), newPass, rs.getString("address"), new ArrayList<>(), new ArrayList<>(), "");
+                    Administrator admin = new Administrator(rs.getString("name"), rs.getString("mail"), newPass, rs.getString("address"), new ArrayList<>(), "");
 
                     if (rs.getString("perms").contains(",")) {
                         String[] split = rs.getString("perms").split(",");
@@ -142,7 +139,6 @@ public class AdministratorManager {
 
             this.getAdministrator_list().forEach(a -> {
                 try {
-                    this.updateAdministratosLogger(a);
                     this.updateLastSessionDate(a);
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -152,23 +148,6 @@ public class AdministratorManager {
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void updateAdministratosLogger(Administrator admin) throws SQLException {
-        List<String> logger = new ArrayList<>();
-
-        if (Main.tableExists(admin.getName() + "_log")) {
-            String table_name = admin.getName() + "_log";
-            try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + table_name)) {
-                try (ResultSet rs = stmt.executeQuery()) {
-                    while (rs.next()) {
-                        String log = rs.getString("date") + "|" + "log:" + rs.getString("log");
-                        logger.add(log);
-                    }
-                    admin.setLogger(logger);
-                }
-            }
         }
     }
 
