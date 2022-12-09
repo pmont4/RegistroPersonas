@@ -17,9 +17,19 @@ public class Main_Frame extends javax.swing.JFrame {
     @Getter
     private AddAdministrator_Frame addInternal;
     
+    @Getter
+    private DeleteAdministrator_Frame deleteInternal;
+    
+    @Getter
+    private RequestLog_Frame requestLogInternal;
+    
     private void initInternalFrames() {
         addInternal = new AddAdministrator_Frame();
         this.mainPane.add(addInternal);
+        deleteInternal = new DeleteAdministrator_Frame();
+        this.mainPane.add(deleteInternal);
+        requestLogInternal = new RequestLog_Frame();
+        this.mainPane.add(requestLogInternal);
     }
 
     public Main_Frame() {
@@ -97,6 +107,8 @@ public class Main_Frame extends javax.swing.JFrame {
         exitMenuItem = new javax.swing.JMenuItem();
         adminsMenu = new javax.swing.JMenu();
         addAdminMenuItem = new javax.swing.JMenuItem();
+        deleteAdminMenuItem = new javax.swing.JMenuItem();
+        requestLogAdminMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -209,6 +221,24 @@ public class Main_Frame extends javax.swing.JFrame {
         });
         adminsMenu.add(addAdminMenuItem);
 
+        deleteAdminMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        deleteAdminMenuItem.setText("Borrar administrador");
+        deleteAdminMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteAdminMenuItemActionPerformed(evt);
+            }
+        });
+        adminsMenu.add(deleteAdminMenuItem);
+
+        requestLogAdminMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        requestLogAdminMenuItem.setText("Solicitar log administrador");
+        requestLogAdminMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                requestLogAdminMenuItemActionPerformed(evt);
+            }
+        });
+        adminsMenu.add(requestLogAdminMenuItem);
+
         jMenuBar1.add(adminsMenu);
 
         setJMenuBar(jMenuBar1);
@@ -237,10 +267,19 @@ public class Main_Frame extends javax.swing.JFrame {
         this.getAddInternal().show();
     }//GEN-LAST:event_addAdminMenuItemActionPerformed
 
+    private void deleteAdminMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteAdminMenuItemActionPerformed
+        this.getDeleteInternal().show();
+    }//GEN-LAST:event_deleteAdminMenuItemActionPerformed
+
+    private void requestLogAdminMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_requestLogAdminMenuItemActionPerformed
+        this.getRequestLogInternal().show();
+    }//GEN-LAST:event_requestLogAdminMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addAdminMenuItem;
     private javax.swing.JTable administratorTable;
     private javax.swing.JMenu adminsMenu;
+    private javax.swing.JMenuItem deleteAdminMenuItem;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -249,6 +288,7 @@ public class Main_Frame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JDesktopPane mainPane;
     private javax.swing.JMenu optionsMenu;
+    private javax.swing.JMenuItem requestLogAdminMenuItem;
     // End of variables declaration//GEN-END:variables
 
 }

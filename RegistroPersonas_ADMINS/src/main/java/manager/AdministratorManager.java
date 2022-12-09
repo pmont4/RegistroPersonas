@@ -83,6 +83,29 @@ public class AdministratorManager {
         this.getAdministrator_list().add(admin);
     }
 
+    public boolean deleteAdministrator(String name) throws SQLException {
+        PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators WHERE name=?");
+        stmt.setString(1, name);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                Optional<Administrator> opt = this.getAdministrator(name);
+                if (opt.isPresent()) {
+                    Administrator admin = opt.get();
+                    stmt = Main.getMySQLConnection().prepareStatement("DELETE FROM administrators WHERE name=?");
+                    stmt.setString(1, admin.getName());
+                    stmt.execute();
+                    stmt = Main.getMySQLConnection().prepareStatement("DROP TABLE " + name + "_log");
+                    stmt.execute();
+                    stmt.close();
+                    
+                    this.getAdministrator_list().remove(admin);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     synchronized void init() throws Exception {
         try {
             PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators");
@@ -125,7 +148,7 @@ public class AdministratorManager {
                     ex.printStackTrace();
                 }
             });
-            
+
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -140,7 +163,7 @@ public class AdministratorManager {
             try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + table_name)) {
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        String log = rs.getString("date") + ":" + "log:" + rs.getString("log");
+                        String log = rs.getString("date") + "|" + "log:" + rs.getString("log");
                         logger.add(log);
                     }
                     admin.setLogger(logger);

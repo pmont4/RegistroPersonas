@@ -66,9 +66,17 @@ public class AddAdministrator_Frame extends javax.swing.JInternalFrame {
                                 Main.getMain_Frame().clearTable();
                                 Main.getMain_Frame().fillTable(Main.getAdministratorManager().getAdministrator_list());
                                 
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Se requiere al menos 1 permiso para registrar al administrador.", "Permisos", JOptionPane.WARNING_MESSAGE);
                             }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "La direccion de correo electronico no es valida.", "Correo electronico", JOptionPane.WARNING_MESSAGE);
                         }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Alguno de los campos necesarios no han sido llenados.", "Advertencia", JOptionPane.WARNING_MESSAGE);
                     }
+                } else {
+                    JOptionPane.showMessageDialog(null, "El administrador ya existe en la base de datos.", "Administrador", JOptionPane.WARNING_MESSAGE);
                 }
             }
         }
@@ -134,6 +142,11 @@ public class AddAdministrator_Frame extends javax.swing.JInternalFrame {
 
         saveButton.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         saveButton.setText("Registrar");
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveButtonActionPerformed(evt);
+            }
+        });
 
         clearButton.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         clearButton.setText("Limpiar");
@@ -235,6 +248,15 @@ public class AddAdministrator_Frame extends javax.swing.JInternalFrame {
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
         this.clear();
     }//GEN-LAST:event_clearButtonActionPerformed
+
+    private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
+        try {
+            this.saveAdministrator();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Un error ha sido encontrado: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+    }//GEN-LAST:event_saveButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
