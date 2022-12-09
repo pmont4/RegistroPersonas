@@ -88,7 +88,7 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
     private void registerPerson() throws SQLException {
         if (!(this.nameField.getText().isEmpty() && this.dayField.getText().isEmpty() && this.monthField.getText().isEmpty() && this.yearField.getText().isEmpty())) {
             if (!this.containsNumbers(this.nameField.getText())) {
-                if (this.checkLettersInDateFields() && (this.dayField.getText().length() == 2 && this.monthField.getText().length() == 2 && this.yearField.getText().length() == 4)) {
+                if (this.checkLettersInDateFields() && (this.dayField.getText().length() <= 2 && this.monthField.getText().length() <= 2 && this.yearField.getText().length() == 4)) {
                     int day = Integer.parseInt(this.dayField.getText()), month = Integer.parseInt(this.monthField.getText()), year = Integer.parseInt(this.yearField.getText());
                     if ((day > 0 && day <= 31) && (month > 0 && month <= 12) && (year > 1910 && year <= LocalDateTime.now().getYear())) {
                         String name = this.nameField.getText();
