@@ -1,6 +1,9 @@
 package utils;
 
 import entities.Person;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import main.Main;
@@ -8,6 +11,24 @@ import main.Main;
 public class PeopleTableFilters {
 
     public PeopleTableFilters() {
+    }
+    
+    public void removeFiltres() throws SQLException {
+        List<Person> list = new ArrayList<>();
+        
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM people")) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Person p = new Person(rs.getInt("id"), rs.getString("name"), rs.getString("birth_date"), rs.getString("height"), rs.getString("gender").charAt(0));
+                    list.add(p);
+                }
+            }
+        }
+        
+        if (!list.isEmpty()) {
+            Main.getPersonManager().getPerson_list().clear();
+            Main.getPersonManager().getPerson_list().addAll(list);
+        }
     }
 
     public List<Person> filterAge(String age_limit) {
@@ -29,7 +50,11 @@ public class PeopleTableFilters {
                 }
             }
         });
-
+        
+        if (!toReturn.isEmpty()) {
+            Main.getPersonManager().getPerson_list().clear();
+            Main.getPersonManager().getPerson_list().addAll(toReturn);
+        }
         return toReturn;
     }
 
@@ -84,7 +109,11 @@ public class PeopleTableFilters {
                 }
             }
         }
-
+        
+        if (!toReturn.isEmpty()) {
+            Main.getPersonManager().getPerson_list().clear();
+            Main.getPersonManager().getPerson_list().addAll(toReturn);
+        }
         return toReturn;
     }
 }

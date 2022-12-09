@@ -377,7 +377,7 @@ public class Main_Frame extends javax.swing.JFrame {
             this.fillTable_People(this.getFilters().filterAge("adult"));
             this.hasFilterApplied = true;
         } else {
-            JOptionPane.showMessageDialog(null, "Ningun adulto fue encontrado en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Ningun adulto fue encontrado en la lista actual.", "Filtros", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_adultFilterMenuItemActionPerformed
 
@@ -387,16 +387,22 @@ public class Main_Frame extends javax.swing.JFrame {
             this.fillTable_People(this.getFilters().filterAge("young"));
             this.hasFilterApplied = true;
         } else {
-            JOptionPane.showMessageDialog(null, "Ningun menor de edad fue encontrado en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Ningun menor de edad fue encontrado en la lista actual.", "Filtros", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_youngerPeopleFilterMenuItemActionPerformed
 
     private void removeFiltersMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeFiltersMenuItemActionPerformed
         if (this.hasFilterApplied) {
-            this.clearRowsInTable();
-            this.fillTable_People(Main.getPersonManager().getPerson_list());
-
-            this.hasFilterApplied = false;
+            try {
+                this.clearRowsInTable();
+                this.getFilters().removeFiltres();
+                this.fillTable_People(Main.getPersonManager().getPerson_list());
+                
+                this.hasFilterApplied = false;
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
         } else {
             JOptionPane.showMessageDialog(null, "Ningun filtro fue previamente aplicado.", "Filtros", JOptionPane.WARNING_MESSAGE);
         }
@@ -414,7 +420,7 @@ public class Main_Frame extends javax.swing.JFrame {
             this.fillTable_People(this.getFilters().filterHeightPeople("taller"));
             this.hasFilterApplied = true;
         } else {
-            JOptionPane.showMessageDialog(null, "No se encontro gente alta en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No se encontro gente alta en la lista actual.", "Filtros", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_tallerPeopleFilterMenuItemActionPerformed
 
@@ -424,7 +430,7 @@ public class Main_Frame extends javax.swing.JFrame {
             this.fillTable_People(this.getFilters().filterHeightPeople("smaller"));
             this.hasFilterApplied = true;
         } else {
-            JOptionPane.showMessageDialog(null, "No se encontro gente baja en la base de datos.", "Filtros", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No se encontro gente baja en la lista actual.", "Filtros", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_smallerPeopleFilterMenuItemActionPerformed
 
