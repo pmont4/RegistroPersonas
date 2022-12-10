@@ -10,19 +10,21 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import lombok.Getter;
+import lombok.Setter;
 import main.Main;
+import org.jetbrains.annotations.Nullable;
 
 public class Main_Frame extends javax.swing.JFrame {
-    
+
     @Getter
     private AddAdministrator_Frame addInternal;
-    
+
     @Getter
     private DeleteAdministrator_Frame deleteInternal;
-    
+
     @Getter
     private RequestLog_Frame requestLogInternal;
-    
+
     private void initInternalFrames() {
         addInternal = new AddAdministrator_Frame();
         this.mainPane.add(addInternal);
@@ -32,16 +34,29 @@ public class Main_Frame extends javax.swing.JFrame {
         this.mainPane.add(requestLogInternal);
     }
 
+    @Getter
+    @Setter
+    private boolean modifying;
+
+    @Getter
+    @Setter
+    private boolean canModify;
+
+    @Getter
+    @Setter
+    @Nullable
+    private String modify;
+
     public Main_Frame() {
         initComponents();
-        
+
         this.setTitle("Registro administradores");
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
-        
+
         this.addWindowListener(new WindowAdapter() {
-            
+
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
@@ -51,42 +66,43 @@ public class Main_Frame extends javax.swing.JFrame {
                     ex.printStackTrace();
                 }
             }
-            
+
         });
-        
+
         this.fillTable(Main.getAdministratorManager().getAdministrator_list());
         this.initInternalFrames();
     }
-    
+
     public void updateAdministratorTableModel(TableModel model) {
         this.administratorTable.setModel(model);
     }
-    
+
     public TableModel getAdministratorTableModel() {
         return this.administratorTable.getModel();
     }
-    
+
     public void fillTable(List<Administrator> list) {
         Object[] data = new Object[this.administratorTable.getColumnCount()];
-        
+
         DefaultTableModel newModel = (DefaultTableModel) this.getAdministratorTableModel();
         list.forEach(a -> {
-            data[0] = a.getName();
-            data[1] = a.getMail();
+            data[0] = a.getId();
+            data[1] = a.getName();
+            data[2] = a.getMail();
             if (a.getAddress().equalsIgnoreCase("None")) {
-                data[2] = "No registrada";
+                data[3] = "No registrada";
             } else {
-                data[2] = a.getAddress();
+                data[3] = a.getAddress();
             }
             String perms = a.getPerms().toString().replace("[", "").replace("]", "").replace("add", "Agregar").replace("remove", "Remover").replace("modify", "Modificar") + ".";
-            data[3] = perms;
-            data[4] = a.getLast_session();
-            
+            data[4] = perms;
+            data[5] = a.getLast_session();
+
             newModel.addRow(data);
         });
         this.updateAdministratorTableModel(newModel);
     }
-    
+
     public void clearTable() {
         DefaultTableModel newModel = (DefaultTableModel) this.getAdministratorTableModel();
         newModel.setRowCount(0);
@@ -109,6 +125,7 @@ public class Main_Frame extends javax.swing.JFrame {
         adminsMenu = new javax.swing.JMenu();
         addAdminMenuItem = new javax.swing.JMenuItem();
         deleteAdminMenuItem = new javax.swing.JMenuItem();
+        modifyAdminMenuItem = new javax.swing.JMenuItem();
         requestLogAdminMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -154,14 +171,14 @@ public class Main_Frame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Nombre", "Correo", "Direccion", "Permisos", "Ultima sesion"
+                "Id", "Nombre", "Correo", "Direccion", "Permisos", "Ultima sesion"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -170,6 +187,11 @@ public class Main_Frame extends javax.swing.JFrame {
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
+            }
+        });
+        administratorTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                administratorTableMouseClicked(evt);
             }
         });
         jScrollPane1.setViewportView(administratorTable);
@@ -231,6 +253,15 @@ public class Main_Frame extends javax.swing.JFrame {
         });
         adminsMenu.add(deleteAdminMenuItem);
 
+        modifyAdminMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        modifyAdminMenuItem.setText("Modificar administrador");
+        modifyAdminMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                modifyAdminMenuItemActionPerformed(evt);
+            }
+        });
+        adminsMenu.add(modifyAdminMenuItem);
+
         requestLogAdminMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         requestLogAdminMenuItem.setText("Solicitar log administrador");
         requestLogAdminMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -276,6 +307,81 @@ public class Main_Frame extends javax.swing.JFrame {
         this.getRequestLogInternal().show();
     }//GEN-LAST:event_requestLogAdminMenuItemActionPerformed
 
+    private void administratorTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_administratorTableMouseClicked
+        if (this.isCanModify()) {
+            int row = this.administratorTable.getSelectedRow();
+            int colum = this.administratorTable.getSelectedColumn();
+
+            if (row != -1) {
+                if (colum != 0) {
+                    if (colum != 5) {
+                        if (!this.isModifying()) {
+                            int id = Integer.parseInt(this.administratorTable.getValueAt(row, 0).toString());
+
+                            switch (colum) {
+                                case 1: {
+                                    this.setModify("name");
+                                    break;
+                                }
+                                case 2: {
+                                    this.setModify("mail");
+                                    break;
+                                }
+                                case 3: {
+                                    this.setModify("address");
+                                    break;
+                                }
+                                case 4: {
+                                    this.setModify("perms");
+                                    break;
+                                }
+                            }
+
+                            switch (this.getModify()) {
+                                case "name":
+                                case "mail":
+                                case "address": {
+                                    StringModifying_Frame s_modify = new StringModifying_Frame();
+                                    this.mainPane.add(s_modify);
+                                    s_modify.setId(id);
+                                    s_modify.setTitle("Modificar (ID: " + id + ")");
+                                    s_modify.show();
+                                    this.setModifying(true);
+                                    break;
+                                }
+                                case "perms": {
+                                    PermissionsModify_Frame perm_modify = new PermissionsModify_Frame();
+                                    this.mainPane.add(perm_modify);
+                                    perm_modify.setId(id);
+                                    perm_modify.setTitle("Modificar (ID: " + id + ")");
+                                    perm_modify.show();
+                                    this.setModifying(true);
+                                    break;
+                                }
+
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "No se pueden modificar dos atributos a la vez.", "Modificar", JOptionPane.WARNING_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Este atributo no puede ser modificado.", "Modificar", JOptionPane.WARNING_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Este atributo no puede ser modificado.", "Modificar", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        }
+    }//GEN-LAST:event_administratorTableMouseClicked
+
+    private void modifyAdminMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modifyAdminMenuItemActionPerformed
+        if (!this.isCanModify()) {
+            this.setCanModify(true);
+            JOptionPane.showMessageDialog(null, "Para modificar a un administrador, seleccione en la tabla el atributo que desea modificar, seguido de eso, ingrese el nuevo dato.", "Modificar", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "Esta opcion ya esta activa.", "Modificar", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_modifyAdminMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addAdminMenuItem;
     private javax.swing.JTable administratorTable;
@@ -288,6 +394,7 @@ public class Main_Frame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JDesktopPane mainPane;
+    private javax.swing.JMenuItem modifyAdminMenuItem;
     private javax.swing.JMenu optionsMenu;
     private javax.swing.JMenuItem requestLogAdminMenuItem;
     // End of variables declaration//GEN-END:variables

@@ -183,8 +183,7 @@ public class LogIn_Frame extends javax.swing.JFrame {
                     System.out.println(admin.toString());
                     
                     JOptionPane.showMessageDialog(null, "Sesion iniciada correctamente.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
-                    
-                    Main.getMain_frame().updateTitle("Registro personas (Administrador conectado: " + admin.getName() + ")");
+                    Main.getMain_frame().setTitle("Registro personas (Administrador conectado: " + admin.getName() + ")");
                     Main.getMain_frame().setVisible(true);
                     this.dispose();
                 } else {

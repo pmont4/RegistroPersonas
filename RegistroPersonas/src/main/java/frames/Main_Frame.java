@@ -6,8 +6,6 @@ import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -48,6 +46,10 @@ public class Main_Frame extends javax.swing.JFrame {
     @Getter
     @Setter
     private boolean modifying;
+
+    @Getter
+    @Setter
+    private boolean canModify;
 
     @Getter
     @Setter
@@ -168,6 +170,7 @@ public class Main_Frame extends javax.swing.JFrame {
         personsMenu = new javax.swing.JMenu();
         addPersonMenuItem = new javax.swing.JMenuItem();
         removePersonMenuItem = new javax.swing.JMenuItem();
+        modifyPersonMenuItem = new javax.swing.JMenuItem();
         searchPersonMenuItem = new javax.swing.JMenuItem();
         filtersMenu = new javax.swing.JMenu();
         adultFilterMenuItem = new javax.swing.JMenuItem();
@@ -321,6 +324,15 @@ public class Main_Frame extends javax.swing.JFrame {
         });
         personsMenu.add(removePersonMenuItem);
 
+        modifyPersonMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        modifyPersonMenuItem.setText("Modificar persona");
+        modifyPersonMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                modifyPersonMenuItemActionPerformed(evt);
+            }
+        });
+        personsMenu.add(modifyPersonMenuItem);
+
         searchPersonMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         searchPersonMenuItem.setText("Mostar persona");
         searchPersonMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -406,6 +418,7 @@ public class Main_Frame extends javax.swing.JFrame {
             CloseSession_Frame closeSession = new CloseSession_Frame();
             this.mainPane.add(closeSession);
             closeSession.show();
+            closeSession.updateAdminLabel();
         } else {
             JOptionPane.showMessageDialog(null, "No hay ninguna sesion actualmente registrada en los archivos.", "Sesion", JOptionPane.WARNING_MESSAGE);
         }
@@ -493,80 +506,97 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_removePersonMenuItemActionPerformed
 
     private void peopleTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_peopleTableMouseClicked
-        int row = this.peopleTable.getSelectedRow();
-        int colum = this.peopleTable.getSelectedColumn();
+        if (this.isCanModify()) {
+            int row = this.peopleTable.getSelectedRow();
+            int colum = this.peopleTable.getSelectedColumn();
 
-        if (row != -1) {
-            if (colum != 0) {
-                if (colum != 5) {
-                    if (colum != 3) {
-                        if (!this.isModifying()) {
-                            int id = Integer.parseInt(this.peopleTable.getValueAt(row, 0).toString());
-                            Object obj = this.peopleTable.getValueAt(row, colum);
+            if (row != -1) {
+                if (colum != 0) {
+                    if (colum != 5) {
+                        if (colum != 3) {
+                            if (!this.isModifying()) {
+                                if (Main.getAdministratorOnline().getPerms().contains("modify")) {
+                                    int id = Integer.parseInt(this.peopleTable.getValueAt(row, 0).toString());
 
-                            String property = obj.toString();
-                            Pattern letters = Pattern.compile("([a-z].*[A-Z])");
-                            Matcher m_letters = letters.matcher(property);
+                                    switch (colum) {
+                                        case 1: {
+                                            this.setModify("name");
+                                            break;
+                                        }
+                                        case 2: {
+                                            this.setModify("birthdate");
+                                            break;
+                                        }
+                                        case 4: {
+                                            this.setModify("height");
+                                            break;
+                                        }
+                                    }
 
-                            Pattern nums = Pattern.compile("([0-9])");
-                            Matcher m_nums = nums.matcher(property);
+                                    this.setModifying(true);
 
-                            if (m_letters.find() && !m_nums.find()) {
-                                this.setModify("name");
-                            } else if (m_nums.find() && property.contains("-")) {
-                                this.setModify("birthdate");
-                            } else if (m_nums.find() && (property.contains("cm") || property.contains("ft"))) {
-                                this.setModify("height");
+                                    switch (this.getModify()) {
+                                        case "name": {
+                                            NameModifying_Frame name = new NameModifying_Frame();
+                                            name.setId(id);
+                                            name.setTitle("Modificar (ID: " + name.getId() + ")");
+                                            this.mainPane.add(name);
+                                            name.show();
+                                            break;
+                                        }
+                                        case "birthdate": {
+                                            BirthDateModifying_Frame birth_date = new BirthDateModifying_Frame();
+                                            birth_date.setId(id);
+                                            birth_date.setTitle("Modificar (ID: " + birth_date.getId() + ")");
+                                            this.mainPane.add(birth_date);
+                                            birth_date.show();
+                                            break;
+                                        }
+                                        case "height": {
+                                            HeightModifying_Frame height = new HeightModifying_Frame();
+                                            height.setId(id);
+                                            height.setTitle("Modificar (ID: " + height.getId() + ")");
+                                            this.mainPane.add(height);
+                                            height.show();
+                                            break;
+                                        }
+
+                                    }
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Permisos insuficientes para realizar esta accion.", "No permisos", JOptionPane.WARNING_MESSAGE);
+                                }
+                            } else {
+                                JOptionPane.showMessageDialog(null, "No se pueden modificar dos atributos a la vez.", "Modificar", JOptionPane.WARNING_MESSAGE);
                             }
-
-                            this.setModifying(true);
-
-                            switch (this.getModify()) {
-                                case "name": {
-                                    NameModifying_Frame name = new NameModifying_Frame();
-                                    name.setId(id);
-                                    name.setTitle("Modificar (ID: " + name.getId() + ")");
-                                    this.mainPane.add(name);
-                                    name.show();
-                                    break;
-                                }
-                                case "birthdate": {
-                                    BirthDateModifying_Frame birth_date = new BirthDateModifying_Frame();
-                                    birth_date.setId(id);
-                                    birth_date.setTitle("Modificar (ID: " + birth_date.getId() + ")");
-                                    this.mainPane.add(birth_date);
-                                    birth_date.show();
-                                    break;
-                                }
-                                case "height": {
-                                    HeightModifying_Frame height = new HeightModifying_Frame();
-                                    height.setId(id);
-                                    height.setTitle("Modificar (ID: " + height.getId() + ")");
-                                    this.mainPane.add(height);
-                                    height.show();
-                                    break;
-                                }
-                                
-                            }
-
                         } else {
-                            JOptionPane.showMessageDialog(null, "No se pueden modificar dos atributos a la vez.", "Modificar", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "La edad no se puede modificar.", "Modificar", JOptionPane.WARNING_MESSAGE);
                         }
                     } else {
-                        JOptionPane.showMessageDialog(null, "La edad no se puede modificar.", "Modificar", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "El genero no se puede modificar.", "Modificar", JOptionPane.WARNING_MESSAGE);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(null, "El genero no se puede modificar.", "Modificar", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "El ID no se puede modificar.", "Modificar", JOptionPane.WARNING_MESSAGE);
                 }
-            } else {
-                JOptionPane.showMessageDialog(null, "El ID no se puede modificar.", "Modificar", JOptionPane.WARNING_MESSAGE);
             }
         }
     }//GEN-LAST:event_peopleTableMouseClicked
-
+    
     private void peopleTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_peopleTableMouseReleased
 
     }//GEN-LAST:event_peopleTableMouseReleased
+    
+    private void modifyPersonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modifyPersonMenuItemActionPerformed
+        if (!this.isCanModify()) {
+            if (Main.getAdministratorOnline().getPerms().contains("modify")) {
+                this.setCanModify(true);
+                JOptionPane.showMessageDialog(null, "Para modificar a una persona, seleccione en la tabla el atributo que desea modificar, seguido de eso, ingrese el nuevo dato.", "Modificar", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Permisos insuficientes para realizar esta accion.", "No permisos", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Esta opcion ya esta activa.", "Modificar", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_modifyPersonMenuItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addPersonMenuItem;
@@ -580,6 +610,7 @@ public class Main_Frame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JDesktopPane mainPane;
+    private javax.swing.JMenuItem modifyPersonMenuItem;
     private javax.swing.JMenu optionsMenu;
     private javax.swing.JTable peopleTable;
     private javax.swing.JMenu personsMenu;

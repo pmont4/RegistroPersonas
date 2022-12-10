@@ -35,8 +35,9 @@ public class HeightModifying_Frame extends JInternalFrame {
 
             @Override
             public void internalFrameClosed(InternalFrameEvent e) {
-                if (Main.getMain_frame().isModifying()) {
+                if (Main.getMain_frame().isModifying() && Main.getMain_frame().isCanModify()) {
                     Main.getMain_frame().setModifying(false);
+                    Main.getMain_frame().setCanModify(false);
                 }
             }
 

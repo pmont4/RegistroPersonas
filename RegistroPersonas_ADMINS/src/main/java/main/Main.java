@@ -52,7 +52,7 @@ public class Main {
                 hikari.connect();
 
                 if (getMySQLConnection() != null) {
-                    try (PreparedStatement stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS administrators (name VARCHAR(32) NOT NULL, mail VARCHAR(60) NOT NULL, password VARCHAR(16) NOT NULL, address TEXT, perms VARCHAR(18) NOT NULL, PRIMARY KEY(mail))")) {
+                    try (PreparedStatement stmt = getMySQLConnection().prepareStatement("CREATE TABLE IF NOT EXISTS administrators (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(32) NOT NULL, mail VARCHAR(60) NOT NULL, password VARCHAR(16) NOT NULL, address TEXT, perms VARCHAR(18) NOT NULL, PRIMARY KEY(id))")) {
                         stmt.execute();
                     }
 

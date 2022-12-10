@@ -11,7 +11,9 @@ public class CloseSession_Frame extends javax.swing.JInternalFrame {
      */
     public CloseSession_Frame() {
         initComponents();
-        
+    }
+    
+    public void updateAdminLabel() {
         this.AdminSessionLabel.setText("Administrador en la sesion: " + Main.getAdministratorOnline().getName());
     }
 

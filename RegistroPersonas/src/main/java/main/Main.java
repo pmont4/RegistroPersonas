@@ -78,6 +78,7 @@ public class Main {
                         if (rs.next()) {
                             LogIn_Frame login = new LogIn_Frame();
                             if (!getJSON_Configuration().existsSessionFile()) {
+                                main_frame = new Main_Frame();
                                 login.setVisible(true);
                             } else {
                                 Optional<Administrator> opt = getJSON_Configuration().getCurrentAdminInJSONFile();

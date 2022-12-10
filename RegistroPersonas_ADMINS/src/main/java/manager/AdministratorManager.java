@@ -29,7 +29,7 @@ public class AdministratorManager {
     public Optional<Administrator> getAdministrator(String name) {
         if (!this.getAdministrator_list().isEmpty()) {
             for (Administrator a : this.getAdministrator_list()) {
-                if (a.getName().equalsIgnoreCase(name)) {
+                if (a.getName().equals(name)) {
                     return Optional.of(a);
                 }
             }
@@ -41,6 +41,7 @@ public class AdministratorManager {
 
     public void createAdministrator(String name, String mail, String password, String address, String perms) throws Exception {
         Administrator admin = new Administrator();
+        admin.setId(0);
         admin.setName(name);
         admin.setMail(mail);
         admin.setPassword(password);
@@ -68,12 +69,13 @@ public class AdministratorManager {
             }
         }
 
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO administrators (name, mail, password, address, perms) VALUES (?,?,?,?,?)")) {
-            stmt.setString(1, admin.getName());
-            stmt.setString(2, admin.getMail());
-            stmt.setString(3, admin.getPassword());
-            stmt.setString(4, admin.getAddress());
-            stmt.setString(5, perms);
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("INSERT INTO administrators (id, name, mail, password, address, perms) VALUES (?,?,?,?,?,?)")) {
+            stmt.setInt(1, 0);
+            stmt.setString(2, admin.getName());
+            stmt.setString(3, admin.getMail());
+            stmt.setString(4, admin.getPassword());
+            stmt.setString(5, admin.getAddress());
+            stmt.setString(6, perms);
             stmt.execute();
         }
 
@@ -81,7 +83,7 @@ public class AdministratorManager {
     }
 
     public boolean deleteAdministrator(String name) throws SQLException {
-        PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators WHERE name=?");
+        PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators WHERE id=?");
         stmt.setString(1, name);
         try (ResultSet rs = stmt.executeQuery()) {
             if (rs.next()) {
@@ -91,7 +93,7 @@ public class AdministratorManager {
                     stmt = Main.getMySQLConnection().prepareStatement("DELETE FROM administrators WHERE name=?");
                     stmt.setString(1, admin.getName());
                     stmt.execute();
-                    stmt = Main.getMySQLConnection().prepareStatement("DROP TABLE " + name + "_log");
+                    stmt = Main.getMySQLConnection().prepareStatement("DROP TABLE " + admin.getName() + "_log");
                     stmt.execute();
                     stmt.close();
                     
@@ -109,7 +111,7 @@ public class AdministratorManager {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     String newPass = rs.getString("password").replaceAll(".", "*");
-                    Administrator admin = new Administrator(rs.getString("name"), rs.getString("mail"), newPass, rs.getString("address"), new ArrayList<>(), "");
+                    Administrator admin = new Administrator(rs.getInt("id"), rs.getString("name"), rs.getString("mail"), newPass, rs.getString("address"), new ArrayList<>(), "");
 
                     if (rs.getString("perms").contains(",")) {
                         String[] split = rs.getString("perms").split(",");
