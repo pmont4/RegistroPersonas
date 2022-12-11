@@ -22,12 +22,12 @@ public class LogIn_Frame extends javax.swing.JFrame {
     }
 
     private Optional<Administrator> checkAdmin(String mail, String pass) throws SQLException {
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators WHERE mail=? AND password =?")) {
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT a.name FROM administrators a WHERE mail = ? AND password = ?")) {
             stmt.setString(1, mail);
             stmt.setString(2, pass);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return Main.getAdministratorManager().getAdministrator(rs.getString("name"));
+                    return Main.getAdministratorManager().getAdministrator(rs.getString("a.name"));
                 } else {
                     return Optional.empty();
                 }

@@ -89,29 +89,29 @@ public class PermissionsModify_Frame extends javax.swing.JInternalFrame {
             stmt.setString(1, perms);
             stmt.setInt(2, id);
             stmt.executeUpdate();
-            stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators");
+            stmt = Main.getMySQLConnection().prepareStatement("SELECT a.* FROM administrators a");
             Main.getMain_Frame().clearTable();
             
             try (ResultSet rs = stmt.executeQuery()) {
                 List<Administrator> list = new ArrayList<>();
                 while (rs.next()) {
                     List<String> permssions = new ArrayList<>();
-                    if (rs.getString("perms").contains(",")) {
-                        String[] split = rs.getString("perms").split("\\,");
+                    if (rs.getString("a.perms").contains(",")) {
+                        String[] split = rs.getString("a.perms").split("\\,");
                         permssions.addAll(Arrays.asList(split));
                     } else {
-                        if (rs.getString("perms").equals("add") || rs.getString("perms").equals("modify") || rs.getString("perms").equals("remove")) {
-                            permssions.add(rs.getString("perms"));
+                        if (rs.getString("a.perms").equals("add") || rs.getString("a.perms").equals("modify") || rs.getString("a.perms").equals("remove")) {
+                            permssions.add(rs.getString("a.perms"));
                         } else {
                             throw new NoSpecifiedPermsException("The current permission string does not contains any existing permission (Add, remove, modify), please verify the upcoming permission string and try again.");
                         }
                     }
-                    Administrator admin = new Administrator(rs.getInt("id"), rs.getString("name"), rs.getString("mail"), rs.getString("password"), rs.getString("address"), permssions, "");
-                    stmt = Main.getMySQLConnection().prepareStatement("SELECT date FROM " + rs.getString("name") + "_log" + " ORDER BY date DESC LIMIT 1");
+                    Administrator admin = new Administrator(rs.getInt("a.id"), rs.getString("a.name"), rs.getString("a.mail"), rs.getString("a.password"), rs.getString("a.address"), permssions, "");
+                    stmt = Main.getMySQLConnection().prepareStatement("SELECT al.date FROM " + rs.getString("a.name") + "_log al ORDER BY date DESC LIMIT 1");
                     try (ResultSet rs2 = stmt.executeQuery()) {
                         String lastSession = "None";
                         if (rs2.next()) {
-                            lastSession = rs2.getString("date");
+                            lastSession = rs2.getString("al.date");
                         }
                         admin.setLast_session(lastSession);
                     }

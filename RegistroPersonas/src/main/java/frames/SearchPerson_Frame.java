@@ -24,7 +24,7 @@ public class SearchPerson_Frame extends javax.swing.JInternalFrame {
     public SearchPerson_Frame() {
         initComponents();
 
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT p.* FROM people p")) {
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT p.name FROM people p")) {
             try (ResultSet rs = stmt.executeQuery()) {
                 DefaultComboBoxModel model = (DefaultComboBoxModel) this.namesComboBox.getModel();
                 while (rs.next()) {

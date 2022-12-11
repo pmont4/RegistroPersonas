@@ -104,11 +104,11 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
     }
     
     private void fillNamesComboBox() throws SQLException {
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators")) {
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT a.name FROM administrators a")) {
             try (ResultSet rs = stmt.executeQuery()) {
                 DefaultComboBoxModel model = (DefaultComboBoxModel) this.namesComboBox.getModel();
                 while (rs.next()) {
-                    model.addElement(rs.getString("name"));
+                    model.addElement(rs.getString("a.name"));
                 }
                 if (model.getSize() > 0) {
                     this.namesComboBox.setModel(model);
@@ -124,17 +124,17 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
             Object[] data = new Object[this.dataTable.getColumnCount()];
             Administrator admin = opt.get();
             if (Main.tableExists(admin.getName() + "_log")) {
-                try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + admin.getName() + "_log WHERE date = ?")) {
+                try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT al.* FROM " + admin.getName() + "_log al WHERE date = ?")) {
                     stmt.setString(1, date);
                     try (ResultSet rs = stmt.executeQuery()) {
                         HashMap<String, List<String>> mapLogger = new HashMap<>();
                         if (rs.next()) {
-                            if (rs.getString("log").contains(",")) {
-                                String[] split = rs.getString("log").split("\\,");
+                            if (rs.getString("al.log").contains(",")) {
+                                String[] split = rs.getString("al.log").split("\\,");
                                 List<String> arr = Arrays.asList(split);
-                                mapLogger.put(rs.getString("date"), arr);
+                                mapLogger.put(rs.getString("al.date"), arr);
                             } else {
-                                mapLogger.put(rs.getString("date"), Arrays.asList(rs.getString("log")));
+                                mapLogger.put(rs.getString("al.date"), Arrays.asList(rs.getString("al.log")));
                             }
                         }
 
@@ -164,7 +164,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
         if (opt.isPresent()) {
             Administrator admin = opt.get();
             if (this.getAdminLogMap().containsKey(admin)) {
-                File file = new File(this.getLogger_directory().getAbsolutePath() + "\\" + admin.getName() + "_log.txt");
+                File file = new File(this.getLogger_directory().getAbsolutePath() + "\\" + admin.getName() + "_log-(" + date + ").txt");
                 if (!file.exists()) {
                     if (file.createNewFile()) {
                         HashMap<String, List<String>> loggerMap = this.getAdminLogMap().get(admin);
@@ -174,7 +174,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                                     if (loggerMap.containsKey(date)) {
                                         for (String s : loggerMap.get(date)) {
                                             String s_toWrite = s.trim();
-                                            writer.write("Fecha " + date + " |- LOG: \t" + s_toWrite);
+                                            writer.write("Fecha " + date + " |- LOG: \t" + s_toWrite + "." + "\n");
                                         }
                                     }
                                     writer.flush();
@@ -190,7 +190,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                                 if (loggerMap.containsKey(date)) {
                                     for (String s : loggerMap.get(date)) {
                                         String s_toWrite = s.trim();
-                                        writer.write("Fecha " + date + " |- LOG: \t" + s_toWrite);
+                                        writer.write("Fecha " + date + " |- LOG: \t" + s_toWrite + "." + "\n");
                                     }
                                 }
                                 writer.flush();
@@ -208,11 +208,11 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
     public void fillDatesComboBox() throws SQLException {
         String name = this.namesComboBox.getSelectedItem().toString();
         String nameTable = name + "_log";
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + nameTable)) {
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT al.date FROM " + nameTable + " al")) {
             DefaultComboBoxModel model = (DefaultComboBoxModel) this.datesComboBox.getModel();
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    model.addElement(rs.getString("date"));
+                    model.addElement(rs.getString("al.date"));
                 }
             }
             if (model.getSize() > 0) {
@@ -436,6 +436,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
             try {
                 String name = this.namesComboBox.getSelectedItem().toString();
                 String date = this.datesComboBox.getSelectedItem().toString();
+                this.clearTable();
                 this.fillTable(name, date);
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);

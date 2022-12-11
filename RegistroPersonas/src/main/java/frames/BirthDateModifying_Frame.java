@@ -112,11 +112,11 @@ public class BirthDateModifying_Frame extends JInternalFrame {
                             stmt.setInt(2, id);
                             stmt.execute();
 
-                            PreparedStatement stmt2 = Main.getMySQLConnection().prepareStatement("SELECT * FROM people");
+                            PreparedStatement stmt2 = Main.getMySQLConnection().prepareStatement("SELECT p.* FROM people p");
                             try (ResultSet rs = stmt2.executeQuery()) {
                                 List<Person> list = new ArrayList<>();
                                 while (rs.next()) {
-                                    Person person = new Person(rs.getInt("id"), rs.getString("name"), rs.getString("birth_date"), rs.getString("height"), rs.getString("gender").charAt(0));
+                                    Person person = new Person(rs.getInt("p.id"), rs.getString("p.name"), rs.getString("p.birth_date"), rs.getString("p.height"), rs.getString("p.gender").charAt(0));
                                     list.add(person);
                                 }
                                 Main.getPersonManager().getPerson_list().clear();

@@ -253,9 +253,7 @@ public class AddAdministrator_Frame extends javax.swing.JInternalFrame {
         try {
             this.saveAdministrator();
             
-            if (Main.getMain_Frame().getRequestLogInternal().isVisible()) {
-                Main.getMain_Frame().getRequestLogInternal().dispose();
-            }
+            Main.getMain_Frame().closeAllInternalFrames();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "Un error ha sido encontrado: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();

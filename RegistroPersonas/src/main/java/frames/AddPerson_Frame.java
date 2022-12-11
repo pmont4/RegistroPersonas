@@ -18,45 +18,14 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
         initComponents();
     }
 
-    private boolean checkLettersInDateFields() {
-        boolean day = false;
-        for (int i = 0; i < this.dayField.getText().length(); i++) {
-            char c = this.dayField.getText().charAt(i);
-            if (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ' ')) {
-                day = true;
-            }
-        }
-        boolean month = false;
-        for (int i = 0; i < this.monthField.getText().length(); i++) {
-            char c = this.monthField.getText().charAt(i);
-            if (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ' ')) {
-                month = true;
-            }
-        }
-        boolean year = false;
-        for (int i = 0; i < this.yearField.getText().length(); i++) {
-            char c = this.yearField.getText().charAt(i);
-            if (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ' ')) {
-                year = true;
-            }
-        }
-
-        return (!(day && month && year));
-    }
-
-    private boolean checkLettersInHeightField() {
-        boolean hasLetters = false;
-        for (int i = 0; i < this.heightField.getText().length(); i++) {
-            char c = this.heightField.getText().charAt(i);
-            if (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == ' ')) {
-                hasLetters = true;
-            }
-        }
-        return !hasLetters;
-    }
-
     private boolean containsNumbers(String s) {
         Pattern p = Pattern.compile("([0-9])");
+        Matcher m = p.matcher(s);
+        return m.find();
+    }
+    
+    private boolean containsLetters(String s) {
+        Pattern p = Pattern.compile("([a-z].*[A-Z])");
         Matcher m = p.matcher(s);
         return m.find();
     }
@@ -88,7 +57,7 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
     private void registerPerson() throws SQLException {
         if (!(this.nameField.getText().isEmpty() && this.dayField.getText().isEmpty() && this.monthField.getText().isEmpty() && this.yearField.getText().isEmpty())) {
             if (!this.containsNumbers(this.nameField.getText())) {
-                if (this.checkLettersInDateFields() && (this.dayField.getText().length() <= 2 && this.monthField.getText().length() <= 2 && this.yearField.getText().length() == 4)) {
+                if ((!(this.containsLetters(this.dayField.getText()) && this.containsLetters(this.monthField.getText()) && this.containsLetters(this.yearField.getText()))) && (this.dayField.getText().length() <= 2 && this.monthField.getText().length() <= 2 && this.yearField.getText().length() == 4)) {
                     int day = Integer.parseInt(this.dayField.getText()), month = Integer.parseInt(this.monthField.getText()), year = Integer.parseInt(this.yearField.getText());
                     if ((day > 0 && day <= 31) && (month > 0 && month <= 12) && (year > 1910 && year <= LocalDateTime.now().getYear())) {
                         String name = this.nameField.getText();
@@ -96,6 +65,8 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                         StringBuilder sb = new StringBuilder();
                         String day_s = "";
                         String month_s = "";
+                        String year_s = this.yearField.getText();
+                        
                         if (day < 10) {
                             if (this.dayField.getText().contains("0")) {
                                 day_s = this.dayField.getText();
@@ -114,7 +85,8 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                         } else {
                             month_s = this.monthField.getText();
                         }
-                        sb.append(this.yearField.getText()).append("-").append(month_s).append("-").append(day_s);
+                        
+                        sb.append(year_s).append("-").append(month_s).append("-").append(day_s);
                         String date = sb.toString();
 
                         char gender;
@@ -137,7 +109,7 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                         String height = "None";
 
                         if (!this.heightField.getText().isEmpty()) {
-                            if (this.checkLettersInHeightField()) {
+                            if (!this.containsLetters(this.heightField.getText())) {
                                 switch (this.measurementUnitComboBox.getSelectedIndex()) {
                                     case 0: {
                                         height = this.buildHeight(this.heightField.getText(), this.measurementUnitComboBox.getSelectedIndex());
@@ -379,7 +351,7 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         try {
             if (!this.nameField.getText().isEmpty()) {
-                try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM people WHERE name=?")) {
+                try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT p.id FROM people p WHERE name = ?")) {
                     stmt.setString(1, this.nameField.getText());
                     try (ResultSet rs = stmt.executeQuery()) {
                         if (!rs.next()) {

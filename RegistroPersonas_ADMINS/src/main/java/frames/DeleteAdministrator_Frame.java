@@ -1,6 +1,9 @@
 package frames;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import main.Main;
 
@@ -11,6 +14,21 @@ public class DeleteAdministrator_Frame extends javax.swing.JInternalFrame {
      */
     public DeleteAdministrator_Frame() {
         initComponents();
+
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT a.name FROM administrators a")) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                DefaultComboBoxModel model = (DefaultComboBoxModel) this.namesComboBox.getModel();
+                while (rs.next()) {
+                    model.addElement(rs.getString("a.name"));
+                }
+                if (model.getSize() > 0) {
+                    this.namesComboBox.setModel(model);
+                }
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -24,8 +42,8 @@ public class DeleteAdministrator_Frame extends javax.swing.JInternalFrame {
 
         jPanel1 = new javax.swing.JPanel();
         nameLabel = new javax.swing.JLabel();
-        nameField = new javax.swing.JTextField();
         deleteButton = new javax.swing.JButton();
+        namesComboBox = new javax.swing.JComboBox<>();
 
         setClosable(true);
         setIconifiable(true);
@@ -34,7 +52,7 @@ public class DeleteAdministrator_Frame extends javax.swing.JInternalFrame {
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Datos", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 11))); // NOI18N
 
         nameLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
-        nameLabel.setText("Ingrese el nombre del administrador:");
+        nameLabel.setText("Seleccione el nombre del administrador:");
 
         deleteButton.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         deleteButton.setText("Borrar");
@@ -44,20 +62,22 @@ public class DeleteAdministrator_Frame extends javax.swing.JInternalFrame {
             }
         });
 
+        namesComboBox.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(44, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(nameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(nameField))
-                .addGap(44, 44, 44))
-            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(108, 108, 108)
                 .addComponent(deleteButton)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(42, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(nameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(namesComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(30, 30, 30))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -65,10 +85,10 @@ public class DeleteAdministrator_Frame extends javax.swing.JInternalFrame {
                 .addContainerGap()
                 .addComponent(nameLabel)
                 .addGap(18, 18, 18)
-                .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(namesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(deleteButton)
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -92,27 +112,21 @@ public class DeleteAdministrator_Frame extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        if (!this.nameField.getText().isEmpty()) {
-            try {
-                if (Main.getAdministratorManager().deleteAdministrator(this.nameField.getText())) {
-                    JOptionPane.showMessageDialog(null, "Se elimino al administrador " + this.nameField.getText() + " de la base de datos.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
-                    this.nameField.setText("");
+        try {
+            String name = this.namesComboBox.getSelectedItem().toString();
+            if (Main.getAdministratorManager().deleteAdministrator(name)) {
+                JOptionPane.showMessageDialog(null, "Se elimino al administrador " + name + " de la base de datos.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
 
-                    Main.getMain_Frame().clearTable();
-                    Main.getMain_Frame().fillTable(Main.getAdministratorManager().getAdministrator_list());
+                Main.getMain_Frame().clearTable();
+                Main.getMain_Frame().fillTable(Main.getAdministratorManager().getAdministrator_list());
 
-                    if (Main.getMain_Frame().getRequestLogInternal().isVisible()) {
-                        Main.getMain_Frame().getRequestLogInternal().dispose();
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "El administrador " + this.nameField.getText() + " no fue encontrado en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);
+                if (Main.getMain_Frame().getRequestLogInternal().isVisible()) {
+                    Main.getMain_Frame().getRequestLogInternal().dispose();
                 }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
             }
-        } else {
-            JOptionPane.showMessageDialog(null, "Por favor, proporcione un nombre para continuar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }//GEN-LAST:event_deleteButtonActionPerformed
 
@@ -120,8 +134,8 @@ public class DeleteAdministrator_Frame extends javax.swing.JInternalFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton deleteButton;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField nameField;
     private javax.swing.JLabel nameLabel;
+    private javax.swing.JComboBox<String> namesComboBox;
     // End of variables declaration//GEN-END:variables
 
 }

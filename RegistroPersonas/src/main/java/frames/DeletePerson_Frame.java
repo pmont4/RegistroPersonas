@@ -1,10 +1,13 @@
 package frames;
 
+import entities.Person;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import main.Main;
 
@@ -15,6 +18,17 @@ public class DeletePerson_Frame extends javax.swing.JInternalFrame {
      */
     public DeletePerson_Frame() {
         initComponents();
+        
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT p.name FROM people p")) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                DefaultComboBoxModel model = (DefaultComboBoxModel) this.namesComboBox.getModel();
+                while (rs.next()) {
+                    model.addElement(rs.getString("p.name"));
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DeletePerson_Frame.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -28,8 +42,8 @@ public class DeletePerson_Frame extends javax.swing.JInternalFrame {
 
         jPanel1 = new javax.swing.JPanel();
         idLabel = new javax.swing.JLabel();
-        idField = new javax.swing.JTextField();
         deleteButton = new javax.swing.JButton();
+        namesComboBox = new javax.swing.JComboBox<>();
 
         setClosable(true);
         setIconifiable(true);
@@ -37,9 +51,7 @@ public class DeletePerson_Frame extends javax.swing.JInternalFrame {
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Datos", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 11))); // NOI18N
 
         idLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
-        idLabel.setText("ID de la persona:");
-
-        idField.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        idLabel.setText("Seleccione el nombre de la persona:");
 
         deleteButton.setText("Borrar");
         deleteButton.addActionListener(new java.awt.event.ActionListener() {
@@ -48,30 +60,34 @@ public class DeletePerson_Frame extends javax.swing.JInternalFrame {
             }
         });
 
+        namesComboBox.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGap(0, 39, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
+                        .addGap(119, 119, 119)
                         .addComponent(deleteButton))
-                    .addComponent(idLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(idField, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(20, 20, 20))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(59, 59, 59)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(idLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(namesComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap(60, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(idLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(idField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(namesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
                 .addComponent(deleteButton)
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -94,42 +110,44 @@ public class DeletePerson_Frame extends javax.swing.JInternalFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    public boolean containLetters(String s) {
-        Pattern p = Pattern.compile("([a-z].*[A-Z])");
-        Matcher m = p.matcher(s);
-        return m.find();
-    }
-
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        if (!this.idField.getText().isEmpty()) {
-            if (!this.containLetters(this.idField.getText())) {
-                try {
-                    int id = Integer.parseInt(this.idField.getText());
-                    if (Main.getPersonManager().deletePerson(id)) {
-                        JOptionPane.showMessageDialog(null, "El ID " + id + " fue correctamente eliminado de la base de datos.");
-                        
-                        Main.getMain_frame().clearRowsInTable();
-                        Main.getMain_frame().fillTable_People(Main.getPersonManager().getPerson_list());
-                        Main.getAdministratorManager().submitLog(Main.getAdministratorOnline(), "Elimino el ID " + id + " de la base de datos");
-                        
-                        this.idField.setText("");
-                    } else {
-                        JOptionPane.showMessageDialog(null, "El ID " + id + " no fue encontrado en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);
-                        this.idField.setText("");
+        try {
+            PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT p.id FROM people p WHERE name = ?");
+            String name = this.namesComboBox.getSelectedItem().toString();
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int id = rs.getInt("p.id");
+                    stmt = Main.getMySQLConnection().prepareStatement("DELETE FROM people WHERE id = ?");
+                    stmt.setInt(1, id);
+                    stmt.execute();
+                    stmt.close();
+                    
+                    JOptionPane.showMessageDialog(null, "Se ha removido a " + name + " de la base de datos.", "Borrar", JOptionPane.INFORMATION_MESSAGE);
+                    Main.getAdministratorManager().submitLog(Main.getAdministratorOnline(), "Elimino a " + name + " de la base de datos");
+                    
+                    Optional<Person> opt = Main.getPersonManager().getPerson(name);
+                    if (opt.isPresent()) {
+                        Person person = opt.get();
+                        Main.getPersonManager().getPerson_list().remove(person);
                     }
-                } catch (SQLException ex) {
-                    Logger.getLogger(DeletePerson_Frame.class.getName()).log(Level.SEVERE, null, ex);
+                    
+                    Main.getMain_frame().clearRowsInTable();
+                    Main.getMain_frame().fillTable_People(Main.getPersonManager().getPerson_list());
+                    this.dispose();
                 }
             }
+        } catch (SQLException ex) {
+            Logger.getLogger(DeletePerson_Frame.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_deleteButtonActionPerformed
 
+    }//GEN-LAST:event_deleteButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton deleteButton;
-    private javax.swing.JTextField idField;
     private javax.swing.JLabel idLabel;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JComboBox<String> namesComboBox;
     // End of variables declaration//GEN-END:variables
 
 }

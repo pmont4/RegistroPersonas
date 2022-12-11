@@ -1,7 +1,6 @@
 package main;
 
 import entities.Administrator;
-import frames.AdministratorRegistration_Frame;
 import frames.LogIn_Frame;
 import frames.Main_Frame;
 import frames.MySQLConfig_Frame;
@@ -31,8 +30,6 @@ public class Main {
     private static PersonManager personManager;
 
     private static JSON_Configuration json_configuration;
-    
-    private static AdministratorRegistration_Frame adminRegis;
     
     private static Administrator admin_online;
     
@@ -73,7 +70,7 @@ public class Main {
                     administratorManager = new AdministratorManager();
                     personManager = new PersonManager();
 
-                    stmt = getMySQLConnection().prepareStatement("SELECT * FROM administrators");
+                    stmt = getMySQLConnection().prepareStatement("SELECT a.id FROM administrators a");
                     try (ResultSet rs = stmt.executeQuery()) {
                         if (rs.next()) {
                             LogIn_Frame login = new LogIn_Frame();

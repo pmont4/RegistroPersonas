@@ -6,6 +6,7 @@ import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -32,6 +33,15 @@ public class Main_Frame extends javax.swing.JFrame {
         this.mainPane.add(deleteInternal);
         requestLogInternal = new RequestLog_Frame();
         this.mainPane.add(requestLogInternal);
+    }
+    
+    public void closeAllInternalFrames() {
+        JInternalFrame[] internalFrames = {this.getAddInternal(), this.getDeleteInternal(), this.getRequestLogInternal()};
+        for (JInternalFrame internal : internalFrames) {
+            if (internal.isVisible()) {
+                internal.dispose();
+            }
+        }
     }
 
     @Getter
