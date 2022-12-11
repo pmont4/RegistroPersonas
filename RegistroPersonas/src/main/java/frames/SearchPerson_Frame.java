@@ -1,7 +1,14 @@
 package frames;
 
 import entities.Person;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.InternalFrameEvent;
@@ -16,6 +23,20 @@ public class SearchPerson_Frame extends javax.swing.JInternalFrame {
      */
     public SearchPerson_Frame() {
         initComponents();
+
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT p.* FROM people p")) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                DefaultComboBoxModel model = (DefaultComboBoxModel) this.namesComboBox.getModel();
+                while (rs.next()) {
+                    model.addElement(rs.getString("p.name"));
+                }
+                if (model.getSize() > 0) {
+                    this.namesComboBox.setModel(model);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(SearchPerson_Frame.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         this.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
         this.addInternalFrameListener(new InternalFrameListener() {
@@ -65,8 +86,8 @@ public class SearchPerson_Frame extends javax.swing.JInternalFrame {
 
         jPanel1 = new javax.swing.JPanel();
         namePersonLabel = new javax.swing.JLabel();
-        namePersonField = new javax.swing.JTextField();
         searchButton = new javax.swing.JButton();
+        namesComboBox = new javax.swing.JComboBox<>();
 
         setClosable(true);
         setIconifiable(true);
@@ -77,8 +98,6 @@ public class SearchPerson_Frame extends javax.swing.JInternalFrame {
         namePersonLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         namePersonLabel.setText("Nombre de la persona:");
 
-        namePersonField.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
-
         searchButton.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         searchButton.setText("Buscar");
         searchButton.addActionListener(new java.awt.event.ActionListener() {
@@ -87,33 +106,30 @@ public class SearchPerson_Frame extends javax.swing.JInternalFrame {
             }
         });
 
+        namesComboBox.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(70, 70, 70)
-                        .addComponent(namePersonLabel))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(53, 53, 53)
-                        .addComponent(namePersonField, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(94, 94, 94)
-                        .addComponent(searchButton)))
-                .addContainerGap(65, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(namePersonLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(namesComboBox, 0, 231, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(searchButton)
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(namePersonLabel)
-                .addGap(18, 18, 18)
-                .addComponent(namePersonField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(searchButton)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(namePersonLabel)
+                    .addComponent(searchButton)
+                    .addComponent(namesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -137,52 +153,69 @@ public class SearchPerson_Frame extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
-        if (!this.namePersonField.getText().isEmpty()) {
-            String name = this.namePersonField.getText();
-            DefaultTableModel newModel = (DefaultTableModel) Main.getMain_frame().getPeopleTableModel();
-            Main.getMain_frame().clearRowsInTable();
+        String name = this.namesComboBox.getSelectedItem().toString();
+        DefaultTableModel newModel = (DefaultTableModel) Main.getMain_frame().getPeopleTableModel();
+        Main.getMain_frame().clearRowsInTable();
 
-            Optional<Person> opt = Main.getPersonManager().getPerson(name);
-            if (opt.isPresent()) {
-                Person person = opt.get();
+        Optional<Person> opt = Main.getPersonManager().getPerson(name);
+        if (opt.isPresent()) {
+            Person person = opt.get();
 
-                Object[] data = new Object[Main.getMain_frame().getPeopleTableModel().getColumnCount()];
-                data[0] = person.getId();
-                data[1] = person.getName();
-                data[2] = person.getBirth_date();
-                data[3] = Main.getPersonManager().getPersonAge(person);
-                data[4] = person.getHeight();
-                switch (person.getGender()) {
-                    case 'M': {
-                        data[5] = "Masculino";
+            Object[] data = new Object[Main.getMain_frame().getPeopleTableModel().getColumnCount()];
+            data[0] = person.getId();
+            data[1] = person.getName();
+            data[2] = person.getBirth_date();
+            data[3] = Main.getPersonManager().getPersonAge(person);
+            if (!person.getHeight().equals("None")) {
+                String string_height = "";
+
+                String[] split = person.getHeight().split("\\-");
+                switch (split[1]) {
+                    case "cm": {
+                        double ft = (Double.parseDouble(split[0]) / 30.48);
+                        BigDecimal height = new BigDecimal(ft);
+                        string_height = person.getHeight().replace("-", "") + " (" + height.setScale(2, BigDecimal.ROUND_HALF_UP) + "ft)";
                         break;
                     }
-                    case 'F': {
-                        data[5] = "Femenino";
-                        break;
-                    }
-                    case 'N':
-                    default: {
-                        data[5] = "No especificado";
+                    case "ft": {
+                        double cm = (Double.parseDouble(split[0]) * 30.48);
+                        BigDecimal height = new BigDecimal(cm);
+                        string_height = person.getHeight().replace("-", "") + " (" + height.setScale(1, BigDecimal.ROUND_HALF_UP) + "cm)";
                         break;
                     }
                 }
-                newModel.addRow(data);
-
-                Main.getMain_frame().updateTableModel(newModel);
+                data[4] = string_height;
             } else {
-                JOptionPane.showMessageDialog(null, "La persona no fue encontrada en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);
+                data[4] = "None";
             }
+            switch (person.getGender()) {
+                case 'M': {
+                    data[5] = "Masculino";
+                    break;
+                }
+                case 'F': {
+                    data[5] = "Femenino";
+                    break;
+                }
+                case 'N':
+                default: {
+                    data[5] = "No especificado";
+                    break;
+                }
+            }
+            newModel.addRow(data);
+
+            Main.getMain_frame().updateTableModel(newModel);
         } else {
-            JOptionPane.showMessageDialog(null, "Por favor, proporcione un nombre para mostrar los datos.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "La persona no fue encontrada en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_searchButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField namePersonField;
     private javax.swing.JLabel namePersonLabel;
+    private javax.swing.JComboBox<String> namesComboBox;
     private javax.swing.JButton searchButton;
     // End of variables declaration//GEN-END:variables
 
