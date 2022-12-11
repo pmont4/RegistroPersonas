@@ -11,8 +11,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
@@ -44,7 +44,14 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
         if (!logger_directory.exists()) {
             if (logger_directory.mkdir());
         }
-
+        
+        try {
+            this.fillNamesComboBox();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+        
         this.addInternalFrameListener(new InternalFrameListener() {
             @Override
             public void internalFrameOpened(InternalFrameEvent e) {
@@ -85,6 +92,9 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
         });
     }
 
+    @Getter
+    private String selectedDate;
+
     public TableModel getTableModel() {
         return this.dataTable.getModel();
     }
@@ -92,18 +102,33 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
     public void updateTableModel(TableModel model) {
         this.dataTable.setModel(model);
     }
+    
+    private void fillNamesComboBox() throws SQLException {
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators")) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                DefaultComboBoxModel model = (DefaultComboBoxModel) this.namesComboBox.getModel();
+                while (rs.next()) {
+                    model.addElement(rs.getString("name"));
+                }
+                if (model.getSize() > 0) {
+                    this.namesComboBox.setModel(model);
+                }
+            }
+        } 
+    }
 
-    public void fillTable(String admin_name) throws SQLException {
+    private void fillTable(String admin_name, String date) throws SQLException {
         Optional<Administrator> opt = Main.getAdministratorManager().getAdministrator(admin_name);
         if (opt.isPresent()) {
             DefaultTableModel newModel = (DefaultTableModel) this.getTableModel();
             Object[] data = new Object[this.dataTable.getColumnCount()];
             Administrator admin = opt.get();
             if (Main.tableExists(admin.getName() + "_log")) {
-                try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + admin.getName() + "_log")) {
+                try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + admin.getName() + "_log WHERE date = ?")) {
+                    stmt.setString(1, date);
                     try (ResultSet rs = stmt.executeQuery()) {
                         HashMap<String, List<String>> mapLogger = new HashMap<>();
-                        while (rs.next()) {
+                        if (rs.next()) {
                             if (rs.getString("log").contains(",")) {
                                 String[] split = rs.getString("log").split("\\,");
                                 List<String> arr = Arrays.asList(split);
@@ -114,17 +139,16 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                         }
 
                         if (!mapLogger.isEmpty()) {
-                            for (Map.Entry<String, List<String>> map : mapLogger.entrySet()) {
-                                for (String s : map.getValue()) {
-                                    data[0] = map.getKey();
-                                    String log = s.trim();
-                                    data[1] = log + ".";
-                                    newModel.addRow(data);
-                                }
+                            List<String> logs = mapLogger.get(date);
+                            for (String s : logs) {
+                                data[0] = date;
+                                String log = s.trim();
+                                data[1] = log + ".";
+                                newModel.addRow(data);
                             }
-                            this.getAdminLogMap().put(admin, mapLogger);
-                            this.updateTableModel(newModel);
                         }
+                        this.getAdminLogMap().put(admin, mapLogger);
+                        this.updateTableModel(newModel);
                     }
                 }
             } else {
@@ -135,7 +159,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
         }
     }
 
-    private void generateLogFile(String name) throws IOException {
+    private void generateLogFile(String name, String date) throws IOException {
         Optional<Administrator> opt = Main.getAdministratorManager().getAdministrator(name);
         if (opt.isPresent()) {
             Administrator admin = opt.get();
@@ -147,11 +171,10 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                         if (loggerMap != null) {
                             if (!loggerMap.isEmpty()) {
                                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                                    for (Map.Entry<String, List<String>> map : loggerMap.entrySet()) {
-                                        for (String s : map.getValue()) {
-                                            String log = s.trim();
-                                            String toWrite = "Fecha: " + map.getKey() + "|- \t" + log + "." + "\n";
-                                            writer.write(toWrite);
+                                    if (loggerMap.containsKey(date)) {
+                                        for (String s : loggerMap.get(date)) {
+                                            String s_toWrite = s.trim();
+                                            writer.write("Fecha " + date + " |- LOG: \t" + s_toWrite);
                                         }
                                     }
                                     writer.flush();
@@ -164,11 +187,10 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                     if (loggerMap != null) {
                         if (!loggerMap.isEmpty()) {
                             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                                for (Map.Entry<String, List<String>> map : loggerMap.entrySet()) {
-                                    for (String s : map.getValue()) {
-                                        String log = s.trim();
-                                        String toWrite = "Fecha: " + map.getKey() + "|- \t" + log + "." + "\n";
-                                        writer.write(toWrite);
+                                if (loggerMap.containsKey(date)) {
+                                    for (String s : loggerMap.get(date)) {
+                                        String s_toWrite = s.trim();
+                                        writer.write("Fecha " + date + " |- LOG: \t" + s_toWrite);
                                     }
                                 }
                                 writer.flush();
@@ -183,6 +205,24 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
         }
     }
 
+    public void fillDatesComboBox() throws SQLException {
+        String name = this.namesComboBox.getSelectedItem().toString();
+        String nameTable = name + "_log";
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM " + nameTable)) {
+            DefaultComboBoxModel model = (DefaultComboBoxModel) this.datesComboBox.getModel();
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    model.addElement(rs.getString("date"));
+                }
+            }
+            if (model.getSize() > 0) {
+                this.datesComboBox.setModel(model);
+            } else {
+                JOptionPane.showMessageDialog(null, "No se detectaron logs en la base de datos del administrador.", "Logger", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
     public void clearTable() {
         DefaultTableModel newModel = (DefaultTableModel) this.getTableModel();
         newModel.setRowCount(0);
@@ -191,7 +231,9 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
 
     public void clear() {
         this.clearTable();
-        this.nameField.setText("");
+        DefaultComboBoxModel newModel = (DefaultComboBoxModel) this.datesComboBox.getModel();
+        newModel.removeAllElements();
+        this.datesComboBox.setModel(newModel);
     }
 
     /**
@@ -205,12 +247,15 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
 
         jPanel1 = new javax.swing.JPanel();
         nameLabel = new javax.swing.JLabel();
-        nameField = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         dataTable = new javax.swing.JTable();
-        showButton = new javax.swing.JButton();
+        getDatesButton = new javax.swing.JButton();
         fileButton = new javax.swing.JButton();
         clearButton = new javax.swing.JButton();
+        datesLabel = new javax.swing.JLabel();
+        datesComboBox = new javax.swing.JComboBox<>();
+        showButton = new javax.swing.JButton();
+        namesComboBox = new javax.swing.JComboBox<>();
 
         setClosable(true);
         setIconifiable(true);
@@ -220,8 +265,6 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
 
         nameLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         nameLabel.setText("Nombre del administrador:");
-
-        nameField.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
 
         dataTable.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
         dataTable.setModel(new javax.swing.table.DefaultTableModel(
@@ -247,13 +290,14 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                 return canEdit [columnIndex];
             }
         });
+        dataTable.setFocusable(false);
         jScrollPane1.setViewportView(dataTable);
 
-        showButton.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
-        showButton.setText("Mostrar");
-        showButton.addActionListener(new java.awt.event.ActionListener() {
+        getDatesButton.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        getDatesButton.setText("Obtener");
+        getDatesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showButtonActionPerformed(evt);
+                getDatesButtonActionPerformed(evt);
             }
         });
 
@@ -273,6 +317,20 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
             }
         });
 
+        datesLabel.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+        datesLabel.setText("Fechas:");
+
+        datesComboBox.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+
+        showButton.setText("Mostrar");
+        showButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showButtonActionPerformed(evt);
+            }
+        });
+
+        namesComboBox.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -281,18 +339,26 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(nameLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(showButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(clearButton)
-                        .addGap(0, 84, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(fileButton)))
+                        .addComponent(fileButton))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(nameLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(namesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(getDatesButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(clearButton))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(datesLabel)
+                                .addGap(18, 18, 18)
+                                .addComponent(datesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(showButton)))
+                        .addGap(0, 82, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -301,11 +367,16 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(nameLabel)
-                    .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(showButton)
-                    .addComponent(clearButton))
+                    .addComponent(getDatesButton)
+                    .addComponent(clearButton)
+                    .addComponent(namesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 385, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(datesLabel)
+                    .addComponent(datesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(showButton))
+                .addGap(35, 35, 35)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 331, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(fileButton)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -331,55 +402,62 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void showButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showButtonActionPerformed
+    private void getDatesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getDatesButtonActionPerformed
         try {
-            if (!this.nameField.getText().isEmpty()) {
-                if (this.getTableModel().getRowCount() > 0) {
-                    this.fillTable(this.nameField.getText());
-                } else {
-                    this.clearTable();
-                    this.fillTable(this.nameField.getText());
-                }
-            } else {
-                JOptionPane.showMessageDialog(null, "Se debe ingresar un nombre para mostrar los datos.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            }
+            this.fillDatesComboBox();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         }
-    }//GEN-LAST:event_showButtonActionPerformed
+    }//GEN-LAST:event_getDatesButtonActionPerformed
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
         this.clear();
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void fileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileButtonActionPerformed
-        if (!this.nameField.getText().isEmpty()) {
-            if (this.getTableModel().getRowCount() > 0) {
-                try {
-                    this.generateLogFile(this.nameField.getText());
-                    this.clear();
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
-                }
-            } else {
-                JOptionPane.showMessageDialog(null, "Cargue los datos en la tabla para poder generar el archivo.", "Datos", JOptionPane.WARNING_MESSAGE);
+        if (this.dataTable.getRowCount() > 0) {
+            try {
+                String name = this.namesComboBox.getSelectedItem().toString();
+                String date = this.datesComboBox.getSelectedItem().toString();
+                this.generateLogFile(name, date);
+                this.clear();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Se debe ingresar un nombre para generar el archivo del logger.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No se ha encontrado ningun log en la base de datos del administrador.", "Logger", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_fileButtonActionPerformed
+
+    private void showButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showButtonActionPerformed
+        if (this.datesComboBox.getItemCount() > 0) {
+            try {
+                String name = this.namesComboBox.getSelectedItem().toString();
+                String date = this.datesComboBox.getSelectedItem().toString();
+                this.fillTable(name, date);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No se ha encontrado ningun log en la base de datos del administrador, o aun no se ha generado las fechas en el selector.", "Logger", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_showButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton clearButton;
     private javax.swing.JTable dataTable;
+    private javax.swing.JComboBox<String> datesComboBox;
+    private javax.swing.JLabel datesLabel;
     private javax.swing.JButton fileButton;
+    private javax.swing.JButton getDatesButton;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField nameField;
     private javax.swing.JLabel nameLabel;
+    private javax.swing.JComboBox<String> namesComboBox;
     private javax.swing.JButton showButton;
     // End of variables declaration//GEN-END:variables
 

@@ -76,9 +76,6 @@ public class Main {
                     mainFrame = new Main_Frame();
                     mainFrame.setVisible(true);
 
-                } else {
-                    MySQLConfig_Frame mysqlconfig = new MySQLConfig_Frame();
-                    mysqlconfig.setVisible(true);
                 }
             } else {
                 MySQLConfig_Frame mysqlconfig = new MySQLConfig_Frame();
@@ -86,6 +83,8 @@ public class Main {
             }
         } catch (IOException | ParseException | SQLException ex) {
             ex.printStackTrace();
+            MySQLConfig_Frame mysqlconfig = new MySQLConfig_Frame();
+            mysqlconfig.setVisible(true);
         }
     }
 

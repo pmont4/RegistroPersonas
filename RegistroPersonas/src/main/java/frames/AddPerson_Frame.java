@@ -102,6 +102,8 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                             } else {
                                 day_s = "0" + this.dayField.getText();
                             }
+                        } else {
+                            day_s = this.dayField.getText();
                         }
                         if (month < 10) {
                             if (this.monthField.getText().contains("0")) {
@@ -109,6 +111,8 @@ public class AddPerson_Frame extends javax.swing.JInternalFrame {
                             } else {
                                 month_s = "0" + this.monthField.getText();
                             }
+                        } else {
+                            month_s = this.monthField.getText();
                         }
                         sb.append(this.yearField.getText()).append("-").append(month_s).append("-").append(day_s);
                         String date = sb.toString();

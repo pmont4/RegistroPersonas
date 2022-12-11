@@ -252,6 +252,10 @@ public class AddAdministrator_Frame extends javax.swing.JInternalFrame {
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         try {
             this.saveAdministrator();
+            
+            if (Main.getMain_Frame().getRequestLogInternal().isVisible()) {
+                Main.getMain_Frame().getRequestLogInternal().dispose();
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "Un error ha sido encontrado: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
