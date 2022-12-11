@@ -34,7 +34,7 @@ public class Main_Frame extends javax.swing.JFrame {
         requestLogInternal = new RequestLog_Frame();
         this.mainPane.add(requestLogInternal);
     }
-    
+
     public void closeAllInternalFrames() {
         JInternalFrame[] internalFrames = {this.getAddInternal(), this.getDeleteInternal(), this.getRequestLogInternal()};
         for (JInternalFrame internal : internalFrames) {
@@ -310,11 +310,19 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_addAdminMenuItemActionPerformed
 
     private void deleteAdminMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteAdminMenuItemActionPerformed
-        this.getDeleteInternal().show();
+        if (!Main.getAdministratorManager().getAdministrator_list().isEmpty()) {
+            this.getDeleteInternal().show();
+        } else {
+            JOptionPane.showMessageDialog(null, "No se detecto ninguna persona en la base de datos para realizar esta accion.", "Buscar", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_deleteAdminMenuItemActionPerformed
 
     private void requestLogAdminMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_requestLogAdminMenuItemActionPerformed
-        this.getRequestLogInternal().show();
+        if (!Main.getAdministratorManager().getAdministrator_list().isEmpty()) {
+            this.getRequestLogInternal().show();
+        } else {
+            JOptionPane.showMessageDialog(null, "No se detecto ninguna persona en la base de datos para realizar esta accion.", "Buscar", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_requestLogAdminMenuItemActionPerformed
 
     private void administratorTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_administratorTableMouseClicked
@@ -384,11 +392,15 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_administratorTableMouseClicked
 
     private void modifyAdminMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modifyAdminMenuItemActionPerformed
-        if (!this.isCanModify()) {
-            this.setCanModify(true);
-            JOptionPane.showMessageDialog(null, "Para modificar a un administrador, seleccione en la tabla el atributo que desea modificar, seguido de eso, ingrese el nuevo dato.", "Modificar", JOptionPane.INFORMATION_MESSAGE);
+        if (!Main.getAdministratorManager().getAdministrator_list().isEmpty()) {
+            if (!this.isCanModify()) {
+                this.setCanModify(true);
+                JOptionPane.showMessageDialog(null, "Para modificar a un administrador, seleccione en la tabla el atributo que desea modificar, seguido de eso, ingrese el nuevo dato.", "Modificar", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Esta opcion ya esta activa.", "Modificar", JOptionPane.WARNING_MESSAGE);
+            }
         } else {
-            JOptionPane.showMessageDialog(null, "Esta opcion ya esta activa.", "Modificar", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No se detecto ninguna persona en la base de datos para realizar esta accion.", "Buscar", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_modifyAdminMenuItemActionPerformed
 

@@ -474,7 +474,11 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_removeFiltersMenuItemActionPerformed
 
     private void searchPersonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchPersonMenuItemActionPerformed
-        this.getSearchPersonInternal().show();
+        if (!Main.getPersonManager().getPerson_list().isEmpty()) {
+            this.getSearchPersonInternal().show();
+        } else {
+            JOptionPane.showMessageDialog(null, "No se detecto ninguna persona en la base de datos para realizar esta accion.", "Buscar", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_searchPersonMenuItemActionPerformed
 
     private void tallerPeopleFilterMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tallerPeopleFilterMenuItemActionPerformed
@@ -498,10 +502,14 @@ public class Main_Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_smallerPeopleFilterMenuItemActionPerformed
 
     private void removePersonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removePersonMenuItemActionPerformed
-        if (Main.getAdministratorOnline().getPerms().contains("remove")) {
-            this.getDeletePersonInternal().show();
+        if (!Main.getPersonManager().getPerson_list().isEmpty()) {
+            if (Main.getAdministratorOnline().getPerms().contains("remove")) {
+                this.getDeletePersonInternal().show();
+            } else {
+                JOptionPane.showMessageDialog(null, "No tienes permisos para abrir esta ventana.", "Permisos insuficientes", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
-            JOptionPane.showMessageDialog(null, "No tienes permisos para abrir esta ventana.", "Permisos insuficientes", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No se detecto ninguna persona en la base de datos para realizar esta accion.", "Buscar", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_removePersonMenuItemActionPerformed
 
@@ -580,21 +588,25 @@ public class Main_Frame extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_peopleTableMouseClicked
-    
+
     private void peopleTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_peopleTableMouseReleased
 
     }//GEN-LAST:event_peopleTableMouseReleased
-    
+
     private void modifyPersonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modifyPersonMenuItemActionPerformed
-        if (!this.isCanModify()) {
-            if (Main.getAdministratorOnline().getPerms().contains("modify")) {
-                this.setCanModify(true);
-                JOptionPane.showMessageDialog(null, "Para modificar a una persona, seleccione en la tabla el atributo que desea modificar, seguido de eso, ingrese el nuevo dato.", "Modificar", JOptionPane.INFORMATION_MESSAGE);
+        if (!Main.getPersonManager().getPerson_list().isEmpty()) {
+            if (!this.isCanModify()) {
+                if (Main.getAdministratorOnline().getPerms().contains("modify")) {
+                    this.setCanModify(true);
+                    JOptionPane.showMessageDialog(null, "Para modificar a una persona, seleccione en la tabla el atributo que desea modificar, seguido de eso, ingrese el nuevo dato.", "Modificar", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Permisos insuficientes para realizar esta accion.", "No permisos", JOptionPane.WARNING_MESSAGE);
+                }
             } else {
-                JOptionPane.showMessageDialog(null, "Permisos insuficientes para realizar esta accion.", "No permisos", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Esta opcion ya esta activa.", "Modificar", JOptionPane.WARNING_MESSAGE);
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Esta opcion ya esta activa.", "Modificar", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No se detecto ninguna persona en la base de datos para realizar esta accion.", "Buscar", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_modifyPersonMenuItemActionPerformed
 
