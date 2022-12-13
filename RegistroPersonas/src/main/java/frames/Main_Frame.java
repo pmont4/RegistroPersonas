@@ -3,8 +3,13 @@ package frames;
 import entities.Person;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -13,6 +18,10 @@ import javax.swing.table.TableModel;
 import lombok.Getter;
 import lombok.Setter;
 import main.Main;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import utils.PeopleTableFilters;
 
 public class Main_Frame extends javax.swing.JFrame {
@@ -165,6 +174,7 @@ public class Main_Frame extends javax.swing.JFrame {
         peopleTable = new javax.swing.JTable();
         jMenuBar1 = new javax.swing.JMenuBar();
         optionsMenu = new javax.swing.JMenu();
+        fileXLXSMenuItem = new javax.swing.JMenuItem();
         closeSessionMenuItem = new javax.swing.JMenuItem();
         exitMenuItem = new javax.swing.JMenuItem();
         personsMenu = new javax.swing.JMenu();
@@ -282,6 +292,14 @@ public class Main_Frame extends javax.swing.JFrame {
                 optionsMenuActionPerformed(evt);
             }
         });
+
+        fileXLXSMenuItem.setText("Generar archivo XLSX");
+        fileXLXSMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileXLXSMenuItemActionPerformed(evt);
+            }
+        });
+        optionsMenu.add(fileXLXSMenuItem);
 
         closeSessionMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F7, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         closeSessionMenuItem.setText("Cerrar sesion");
@@ -610,11 +628,65 @@ public class Main_Frame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_modifyPersonMenuItemActionPerformed
 
+    private void fileXLXSMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileXLXSMenuItemActionPerformed
+        if (this.peopleTable.getRowCount() > 0) {
+            SXSSFWorkbook wb = new SXSSFWorkbook(1);
+            SXSSFSheet sheet = wb.createSheet();
+            Row row = null;
+            Cell cell = null;
+
+            List<Object> listObj = new ArrayList<>();
+            for (int i = 0; i < Main.getPersonManager().getPerson_list().size(); i++) {
+                Person person = Main.getPersonManager().getPerson_list().get(i);
+                Object[] obj = {person.getId(), person.getName(), person.getBirth_date(), Main.getPersonManager().getPersonAge(person), person.getHeight(), person.getGender()};
+                listObj.add(obj);
+            }
+
+            Object[] header = {"ID", "Nombre", "Fecha de nacimiento", "Edad", "Altura", "Genero"};
+            row = sheet.createRow(0);
+            for (int i = 0; i < header.length; i++) {
+                cell = row.createCell(i);
+                cell.setCellValue(header[i].toString());
+            }
+
+            Iterator<Object> it = listObj.iterator();
+            int pageRow = 1;
+            while (it.hasNext()) {
+                Object[] body = (Object[]) it.next();
+                row = sheet.createRow(pageRow++);
+                for (int i = 0; i < body.length; i++) {
+                    cell = row.createCell(i);
+                    cell.setCellValue(body[i].toString());
+                }
+            }
+
+            try {
+                FileOutputStream out = new FileOutputStream(Main.getJSON_Configuration().getMain_directory().getAbsolutePath() + "\\personas_tableData.xlsx");
+                wb.write(out);
+                out.flush();
+                out.close();
+
+                JOptionPane.showMessageDialog(null, "El archivo XLSX fue generado en la ubicacion: " + Main.getJSON_Configuration().getMain_directory().getPath());
+            } catch (FileNotFoundException ex) {
+                JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            } finally {
+                wb.dispose();
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No se han encontrado personas en la base de datos para generar el archivo.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_fileXLXSMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addPersonMenuItem;
     private javax.swing.JMenuItem adultFilterMenuItem;
     private javax.swing.JMenuItem closeSessionMenuItem;
     private javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenuItem fileXLXSMenuItem;
     private javax.swing.JMenu filtersMenu;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
