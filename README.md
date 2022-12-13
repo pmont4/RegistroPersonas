@@ -1,2 +1,2 @@
 # RegistroPersonas
-Aplicacion de pruebas para operaciones CRUD en Java haciendo uso de Java Swing, MySQL (Con Hikari) y JSON. 
+Aplicacion de pruebas para operaciones CRUD en Java haciendo uso de Java Swing, MySQL (Con Hikari) y JSON (Compatibilidad para escribir archivos Excel). 
