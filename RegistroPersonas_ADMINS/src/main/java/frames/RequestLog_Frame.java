@@ -1,15 +1,21 @@
 package frames;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import entities.Administrator;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import javax.swing.DefaultComboBoxModel;
@@ -20,6 +26,12 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import lombok.Getter;
 import main.Main;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class RequestLog_Frame extends javax.swing.JInternalFrame {
 
@@ -44,14 +56,14 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
         if (!logger_directory.exists()) {
             if (logger_directory.mkdir());
         }
-        
+
         try {
             this.fillNamesComboBox();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         }
-        
+
         this.addInternalFrameListener(new InternalFrameListener() {
             @Override
             public void internalFrameOpened(InternalFrameEvent e) {
@@ -102,7 +114,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
     public void updateTableModel(TableModel model) {
         this.dataTable.setModel(model);
     }
-    
+
     private void fillNamesComboBox() throws SQLException {
         try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT a.name FROM administrators a")) {
             try (ResultSet rs = stmt.executeQuery()) {
@@ -114,7 +126,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                     this.namesComboBox.setModel(model);
                 }
             }
-        } 
+        }
     }
 
     private void fillTable(String admin_name, String date) throws SQLException {
@@ -159,49 +171,121 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
         }
     }
 
-    private void generateLogFile(String name, String date) throws IOException {
+    private synchronized void generateLogFile(String name, String date, String file_type) throws IOException {
         Optional<Administrator> opt = Main.getAdministratorManager().getAdministrator(name);
         if (opt.isPresent()) {
             Administrator admin = opt.get();
             if (this.getAdminLogMap().containsKey(admin)) {
-                File file = new File(this.getLogger_directory().getAbsolutePath() + "\\" + admin.getName() + "_log-(" + date + ").txt");
-                if (!file.exists()) {
-                    if (file.createNewFile()) {
-                        HashMap<String, List<String>> loggerMap = this.getAdminLogMap().get(admin);
-                        if (loggerMap != null) {
-                            if (!loggerMap.isEmpty()) {
-                                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                                    if (loggerMap.containsKey(date)) {
-                                        for (String s : loggerMap.get(date)) {
-                                            String s_toWrite = s.trim();
-                                            writer.write("Fecha " + date + " |- LOG: \t" + s_toWrite + "." + "\n");
+                HashMap<String, List<String>> loggerMap = this.getAdminLogMap().get(admin);
+                if (loggerMap != null) {
+                    if (!loggerMap.isEmpty()) {
+                        switch (file_type) {
+                            case ".txt": {
+                                File file = new File(this.getLogger_directory().getAbsolutePath() + "\\" + admin.getName() + "_log-(" + date + ").txt");
+                                if (!file.exists()) {
+                                    if (file.createNewFile()) {
+                                        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                                            if (loggerMap.containsKey(date)) {
+                                                for (String s : loggerMap.get(date)) {
+                                                    String s_toWrite = s.trim();
+                                                    writer.write("Fecha " + date + " |- LOG: \t" + s_toWrite + "." + "\n");
+                                                }
+                                            }
+                                            writer.flush();
                                         }
                                     }
-                                    writer.flush();
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    HashMap<String, List<String>> loggerMap = this.getAdminLogMap().get(admin);
-                    if (loggerMap != null) {
-                        if (!loggerMap.isEmpty()) {
-                            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                                if (loggerMap.containsKey(date)) {
-                                    for (String s : loggerMap.get(date)) {
-                                        String s_toWrite = s.trim();
-                                        writer.write("Fecha " + date + " |- LOG: \t" + s_toWrite + "." + "\n");
+                                } else {
+                                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                                        if (loggerMap.containsKey(date)) {
+                                            for (String s : loggerMap.get(date)) {
+                                                String s_toWrite = s.trim();
+                                                writer.write("Fecha " + date + " |- LOG: \t" + s_toWrite + "." + "\n");
+                                            }
+                                        }
+                                        writer.flush();
                                     }
                                 }
-                                writer.flush();
+                                JOptionPane.showMessageDialog(null, "El archivo fue generado en la ruta: " + file.getAbsolutePath(), "Informacion", JOptionPane.INFORMATION_MESSAGE);
+                                break;
                             }
+                            case ".json": {
+                                JSONObject json_object_arr = new JSONObject();
+                                if (loggerMap.containsKey(date)) {
+                                    for (String s : loggerMap.get(date)) {
+                                        JSONArray arr = new JSONArray();
+                                        String text = s.trim();
+                                        arr.add(text);
+                                        json_object_arr.put(date, arr);
+                                    }
+                                }
+                                JSONObject obj = new JSONObject();
+                                obj.put("logger", json_object_arr);
+                                File file = new File(this.getLogger_directory().getAbsolutePath() + "\\" + admin.getName() + "_log-(" + date + ").json");
+                                if (!file.exists()) {
+                                    if (file.createNewFile()) {
+                                        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                                            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                                            String toWrite = gson.toJson(obj);
+                                            writer.write(toWrite);
+                                        }
+                                    }
+                                } else {
+                                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                                        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                                        String toWrite = gson.toJson(obj);
+                                        writer.write(toWrite);
+                                    }
+                                }
+                                JOptionPane.showMessageDialog(null, "El archivo fue generado en la ruta: " + file.getAbsolutePath(), "Informacion", JOptionPane.INFORMATION_MESSAGE);
+                                break;
+                            }
+                            case ".xlsx": {
+                                SXSSFWorkbook wb = new SXSSFWorkbook(1);
+                                SXSSFSheet sheet = wb.createSheet();
+                                Row row = null;
+                                Cell cell = null;
+                                
+                                Object[] header = {"Fecha", "Log"};
+                                row = sheet.createRow(0);
+                                for (int i = 0; i < header.length; i++) {
+                                    cell = row.createCell(i);
+                                    cell.setCellValue(header[i].toString());
+                                }
+                                
+                                if (loggerMap.containsKey(date)) {
+                                    List<Object> list = new ArrayList<>();
+                                    for (int i = 0; i < loggerMap.get(date).size(); i++) {
+                                        Object[] newObj = {date, loggerMap.get(date).get(i)};
+                                        list.add(newObj);
+                                    }
+                                    
+                                    Iterator<Object> it = list.iterator();
+                                    int pageRow = 1;
+                                    
+                                    while (it.hasNext()) {
+                                        Object[] body = (Object[]) it.next();
+                                        row = sheet.createRow(pageRow++);
+                                        for (int i = 0; i < body.length; i++) {
+                                            cell = row.createCell(i);
+                                            cell.setCellValue(body[i].toString());
+                                        }
+                                    }
+                                }
+                                
+                                FileOutputStream file = new FileOutputStream(this.getLogger_directory().getAbsolutePath() + "\\" + admin.getName() + "_log-(" + date + ").xlsx");
+                                wb.write(file);
+                                file.flush();
+                                file.close();
+                                wb.dispose();
+                                JOptionPane.showMessageDialog(null, "El archivo fue generado en la ruta: " + this.getLogger_directory().getAbsolutePath() + file.getFD(), "Informacion", JOptionPane.INFORMATION_MESSAGE);
+                                
+                                break;
+                            }
+
                         }
                     }
                 }
-                JOptionPane.showMessageDialog(null, "El archivo fue generado en la ruta: " + file.getAbsolutePath(), "Informacion", JOptionPane.INFORMATION_MESSAGE);
             }
-        } else {
-            JOptionPane.showMessageDialog(null, "El administrador no fue encontrado en la base de datos.", "No encontrado", JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -256,6 +340,8 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
         datesComboBox = new javax.swing.JComboBox<>();
         showButton = new javax.swing.JButton();
         namesComboBox = new javax.swing.JComboBox<>();
+        fileTypeLabel = new javax.swing.JLabel();
+        fileTypeComboBox = new javax.swing.JComboBox<>();
 
         setClosable(true);
         setIconifiable(true);
@@ -331,6 +417,10 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
 
         namesComboBox.setFont(new java.awt.Font("Segoe UI", 0, 11)); // NOI18N
 
+        fileTypeLabel.setText("Tipo de archivo para exportar:");
+
+        fileTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { ".txt", ".xlsx", ".json" }));
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -357,8 +447,12 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                                 .addGap(18, 18, 18)
                                 .addComponent(datesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(showButton)))
-                        .addGap(0, 82, Short.MAX_VALUE)))
+                                .addComponent(showButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(fileTypeLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(fileTypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 45, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -374,7 +468,9 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(datesLabel)
                     .addComponent(datesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(showButton))
+                    .addComponent(showButton)
+                    .addComponent(fileTypeLabel)
+                    .addComponent(fileTypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(35, 35, 35)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 331, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -420,7 +516,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
             try {
                 String name = this.namesComboBox.getSelectedItem().toString();
                 String date = this.datesComboBox.getSelectedItem().toString();
-                this.generateLogFile(name, date);
+                this.generateLogFile(name, date, this.fileTypeComboBox.getSelectedItem().toString());
                 this.clear();
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -454,6 +550,8 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
     private javax.swing.JComboBox<String> datesComboBox;
     private javax.swing.JLabel datesLabel;
     private javax.swing.JButton fileButton;
+    private javax.swing.JComboBox<String> fileTypeComboBox;
+    private javax.swing.JLabel fileTypeLabel;
     private javax.swing.JButton getDatesButton;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
