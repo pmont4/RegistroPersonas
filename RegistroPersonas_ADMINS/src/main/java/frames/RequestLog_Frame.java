@@ -281,7 +281,6 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                                 
                                 break;
                             }
-
                         }
                     }
                 }
