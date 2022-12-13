@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
 import main.Main;
+import utils.Log;
 
 public class AddAdministrator_Frame extends javax.swing.JInternalFrame {
 
@@ -256,7 +257,7 @@ public class AddAdministrator_Frame extends javax.swing.JInternalFrame {
             Main.getMain_Frame().closeAllInternalFrames();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "Un error ha sido encontrado: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
     }//GEN-LAST:event_saveButtonActionPerformed
 

@@ -9,6 +9,7 @@ import java.util.Optional;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import main.Main;
+import utils.Log;
 
 public class LogIn_Frame extends javax.swing.JFrame {
 
@@ -177,7 +178,7 @@ public class LogIn_Frame extends javax.swing.JFrame {
                             Main.getJSON_Configuration().saveAdminSession(admin);
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                            ex.printStackTrace();
+                            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                         }
                     }
                     System.out.println(admin.toString());
@@ -191,7 +192,7 @@ public class LogIn_Frame extends javax.swing.JFrame {
                 }
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
             }
         }
     }//GEN-LAST:event_loginButtonActionPerformed

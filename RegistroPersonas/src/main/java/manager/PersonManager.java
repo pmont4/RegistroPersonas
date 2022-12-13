@@ -6,34 +6,36 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Optional;
 import lombok.Getter;
 import main.Main;
+import utils.Log;
 
 public class PersonManager {
 
     @Getter
-    private List<Person> person_list;
+    private LinkedList<Person> person_list;
 
     public PersonManager() {
         try {
-            this.person_list = new ArrayList<>();
+            this.person_list = new LinkedList<>();
 
             init();
-            System.out.println(this.getPerson_list());
+            Log.write(this.getClass(), this.getPerson_list(), 1);
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
     }
 
     public Optional<Person> getPerson(String name) {
         if (!this.getPerson_list().isEmpty()) {
-            for (Person p : this.getPerson_list()) {
-                if (p.getName().equalsIgnoreCase(name)) {
+            Iterator<Person> iterate = this.getPerson_list().iterator();
+            while (iterate.hasNext()) {
+                var p = iterate.next();
+                if (p.getName().equalsIgnoreCase(name)) 
                     return Optional.of(p);
-                }
             }
         } else {
             return Optional.empty();

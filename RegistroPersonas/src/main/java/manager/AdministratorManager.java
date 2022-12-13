@@ -7,10 +7,12 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Optional;
 import lombok.Getter;
 import main.Main;
+import utils.Log;
 import utils.NoSpecifiedPermsException;
 
 public class AdministratorManager {
@@ -22,14 +24,17 @@ public class AdministratorManager {
         try {
             this.administrator_list = new LinkedList<>();
             init();
+            Log.write(this.getClass(), this.getAdministrator_list(), 1);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
     }
 
     public Optional<Administrator> getAdministrator(String name) {
         if (!this.getAdministrator_list().isEmpty()) {
-            for (Administrator a : this.getAdministrator_list()) {
+            Iterator<Administrator> iterate = this.getAdministrator_list().iterator();
+            while (iterate.hasNext()) {
+                var a = iterate.next();
                 if (a.getName().equalsIgnoreCase(name)) {
                     return Optional.of(a);
                 }
@@ -55,7 +60,7 @@ public class AdministratorManager {
                                 if (split1.equals("add") || split1.equals("modify") || split1.equals("remove")) {
                                     validStringPerms = true;
                                 } else {
-                                    throw new NoSpecifiedPermsException("The current permission string does not contains any existing permission (Add, remove, modify), please verify the upcoming permission string and try again.");
+                                    Log.write(this.getClass(), new NoSpecifiedPermsException("The current permission string does not contains any existing permission (Add, remove, modify), please verify the upcoming permission string and try again."));
                                 }
                             }
 
@@ -66,7 +71,7 @@ public class AdministratorManager {
                             if (rs.getString("perms").equals("add") || rs.getString("perms").equals("modify") || rs.getString("perms").equals("remove")) {
                                 admin.setPerms(Arrays.asList(rs.getString("perms")));
                             } else {
-                                throw new NoSpecifiedPermsException("The current permission string does not contains any existing permission (Add, remove, modify), please verify the upcoming permission string and try again.");
+                                Log.write(this.getClass(), new NoSpecifiedPermsException("The current permission string does not contains any existing permission (Add, remove, modify), please verify the upcoming permission string and try again."));
                             }
                         }
 
@@ -75,7 +80,7 @@ public class AdministratorManager {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.write(this.getClass(), e.getLocalizedMessage(), 3);
         }
     }
 

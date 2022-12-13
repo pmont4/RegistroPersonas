@@ -13,6 +13,7 @@ import javax.swing.event.InternalFrameListener;
 import lombok.Getter;
 import lombok.Setter;
 import main.Main;
+import utils.Log;
 import utils.NoSpecifiedPermsException;
 
 public class StringModifying_Frame extends javax.swing.JInternalFrame {
@@ -260,7 +261,7 @@ public class StringModifying_Frame extends javax.swing.JInternalFrame {
             this.modify(this.getId());
         } catch (SQLException | NoSpecifiedPermsException ex) {
             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
     }//GEN-LAST:event_modifyButtonActionPerformed
 

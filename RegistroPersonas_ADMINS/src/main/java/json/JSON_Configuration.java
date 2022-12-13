@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utils.Log;
 
 public class JSON_Configuration {
     
@@ -35,7 +36,7 @@ public class JSON_Configuration {
                     try {
                         if (this.getJson_file_mysql().createNewFile());
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                     }
                 }
             }
@@ -45,7 +46,7 @@ public class JSON_Configuration {
                 try {
                     if (this.getJson_file_mysql().createNewFile());
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                 }
             }
         }

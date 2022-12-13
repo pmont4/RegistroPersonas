@@ -31,6 +31,7 @@ import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import utils.Log;
 
 public class RequestLog_Frame extends javax.swing.JInternalFrame {
 
@@ -60,7 +61,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
             this.fillNamesComboBox();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
 
         this.addInternalFrameListener(new InternalFrameListener() {
@@ -501,7 +502,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
             this.fillDatesComboBox();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
     }//GEN-LAST:event_getDatesButtonActionPerformed
 
@@ -518,7 +519,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                 this.clear();
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
             }
         } else {
             JOptionPane.showMessageDialog(null, "No se ha encontrado ningun log en la base de datos del administrador.", "Logger", JOptionPane.WARNING_MESSAGE);
@@ -534,7 +535,7 @@ public class RequestLog_Frame extends javax.swing.JInternalFrame {
                 this.fillTable(name, date);
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
             }
         } else {
             JOptionPane.showMessageDialog(null, "No se ha encontrado ningun log en la base de datos del administrador, o aun no se ha generado las fechas en el selector.", "Logger", JOptionPane.WARNING_MESSAGE);

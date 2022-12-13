@@ -5,11 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import main.Main;
+import utils.Log;
 
 public class DeletePerson_Frame extends javax.swing.JInternalFrame {
 
@@ -27,7 +26,7 @@ public class DeletePerson_Frame extends javax.swing.JInternalFrame {
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(DeletePerson_Frame.class.getName()).log(Level.SEVERE, null, ex);
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
     }
 
@@ -138,7 +137,7 @@ public class DeletePerson_Frame extends javax.swing.JInternalFrame {
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(DeletePerson_Frame.class.getName()).log(Level.SEVERE, null, ex);
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
 
     }//GEN-LAST:event_deleteButtonActionPerformed

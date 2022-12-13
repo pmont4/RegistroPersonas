@@ -7,14 +7,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import lombok.Getter;
 import lombok.Setter;
 import main.Main;
+import utils.Log;
 import utils.NoSpecifiedPermsException;
 
 public class PermissionsModify_Frame extends javax.swing.JInternalFrame {
@@ -227,7 +226,7 @@ public class PermissionsModify_Frame extends javax.swing.JInternalFrame {
             this.modify(this.getId());
         } catch (SQLException | NoSpecifiedPermsException  ex) {
             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
     }//GEN-LAST:event_modifyButtonActionPerformed
 

@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import main.Main;
 import utils.HikariConnection;
+import utils.Log;
 
 public class MySQLConfig_Frame extends javax.swing.JFrame {
 
@@ -77,7 +78,7 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
                     hikari.connect();
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
+                    Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Algunos campos necesarios parecen no haber sido rellenados.", "Advertencia", JOptionPane.WARNING_MESSAGE);
@@ -315,7 +316,7 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
                     }
                 } catch (SQLException | InterruptedException ex) {
                     JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
+                    Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                 }
             }
 
@@ -337,12 +338,12 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
                                 hikari.getConnection().close();
                             } catch (SQLException ex) {
                                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                                ex.printStackTrace();
+                                Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                             }
                             this.dispose();
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                            ex.printStackTrace();
+                            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                         }
                     } else if (this.ssl.equals("false") && !this.sslCheckBox.isSelected()) {
                         try {
@@ -352,13 +353,13 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
                                 hikari.getConnection().close();
                             } catch (SQLException ex) {
                                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                                ex.printStackTrace();
+                                Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                             }
                             JOptionPane.showMessageDialog(null, "Los datos han sido correctamente guardados, reinicie el programa.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
                             this.dispose();
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                            ex.printStackTrace();
+                            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                         }
                     } else {
                         JOptionPane.showMessageDialog(null, "Cambios fueron detectaos en los datos ingresados, por favor volver a comprobar la conexion antes de seguir", "Advertencia", JOptionPane.WARNING_MESSAGE);
@@ -368,7 +369,7 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
                             hikari.getConnection().close();
                         } catch (SQLException ex) {
                             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                            ex.printStackTrace();
+                            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                         }
                     }
                 } else {
@@ -379,7 +380,7 @@ public class MySQLConfig_Frame extends javax.swing.JFrame {
                         hikari.getConnection().close();
                     } catch (SQLException ex) {
                         JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                        ex.printStackTrace();
+                        Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                     }
                 }
             } else {

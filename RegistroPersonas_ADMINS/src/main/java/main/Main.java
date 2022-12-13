@@ -16,6 +16,7 @@ import json.JSON_Configuration;
 import manager.AdministratorManager;
 import org.json.simple.parser.ParseException;
 import utils.HikariConnection;
+import utils.Log;
 
 public class Main {
 
@@ -82,7 +83,7 @@ public class Main {
                 mysqlconfig.setVisible(true);
             }
         } catch (IOException | ParseException | SQLException ex) {
-            ex.printStackTrace();
+            Log.write(Main.class, ex.getLocalizedMessage(), 3);
             MySQLConfig_Frame mysqlconfig = new MySQLConfig_Frame();
             mysqlconfig.setVisible(true);
         }

@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import main.Main;
 import org.jetbrains.annotations.Nullable;
+import utils.Log;
 
 public class Main_Frame extends javax.swing.JFrame {
 
@@ -73,7 +74,7 @@ public class Main_Frame extends javax.swing.JFrame {
                     Main.getMySQLConnection().close();
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
+                    Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                 }
             }
 

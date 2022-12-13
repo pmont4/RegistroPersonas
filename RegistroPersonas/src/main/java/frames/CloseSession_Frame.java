@@ -3,6 +3,7 @@ package frames;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 import main.Main;
+import utils.Log;
 
 public class CloseSession_Frame extends javax.swing.JInternalFrame {
 
@@ -106,7 +107,7 @@ public class CloseSession_Frame extends javax.swing.JInternalFrame {
             System.exit(0);
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
     }//GEN-LAST:event_logOutButtonActionPerformed
 

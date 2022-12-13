@@ -18,6 +18,7 @@ import manager.AdministratorManager;
 import manager.PersonManager;
 import org.json.simple.parser.ParseException;
 import utils.HikariConnection;
+import utils.Log;
 
 /*
  Recode total del proyecto
@@ -102,7 +103,7 @@ public class Main {
                 mysqlconfig.setVisible(true);
             }
         } catch (SQLException | IOException | ParseException ex) {
-            ex.printStackTrace();
+            Log.write(Main.class, ex.getLocalizedMessage(), 3);
             MySQLConfig_Frame mysqlconfig = new MySQLConfig_Frame();
             mysqlconfig.setVisible(true);
         }

@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import utils.Log;
 import utils.PeopleTableFilters;
 
 public class Main_Frame extends javax.swing.JFrame {
@@ -83,7 +84,7 @@ public class Main_Frame extends javax.swing.JFrame {
                 try {
                     Main.getMySQLConnection().close();
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
                 }
             }
 
@@ -484,7 +485,7 @@ public class Main_Frame extends javax.swing.JFrame {
                 this.hasFilterApplied = false;
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
             }
         } else {
             JOptionPane.showMessageDialog(null, "Ningun filtro fue previamente aplicado.", "Filtros", JOptionPane.WARNING_MESSAGE);
@@ -669,10 +670,10 @@ public class Main_Frame extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "El archivo XLSX fue generado en la ubicacion: " + Main.getJSON_Configuration().getMain_directory().getPath());
             } catch (FileNotFoundException ex) {
                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+                Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
             } finally {
                 wb.dispose();
             }

@@ -15,6 +15,7 @@ import javax.swing.event.InternalFrameListener;
 import lombok.Getter;
 import lombok.Setter;
 import main.Main;
+import utils.Log;
 
 public class HeightModifying_Frame extends JInternalFrame {
 
@@ -236,7 +237,7 @@ public class HeightModifying_Frame extends JInternalFrame {
             this.modify(this.getId());
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Un error ha ocurrido: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+            Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
         }
     }//GEN-LAST:event_modifyButtonActionPerformed
 

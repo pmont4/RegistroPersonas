@@ -1,4 +1,5 @@
 target/
 src/main/java/frames/*.form
+logger/
 
 dependency-reduced-pom.xml
