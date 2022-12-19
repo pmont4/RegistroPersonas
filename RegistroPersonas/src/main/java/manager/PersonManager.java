@@ -84,7 +84,7 @@ public class PersonManager {
         return period.getYears();
     }
 
-    synchronized void init() throws SQLException {
+    protected synchronized void init() throws SQLException {
         try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM people")) {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {

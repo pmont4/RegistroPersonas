@@ -101,7 +101,7 @@ public class AdministratorManager {
         return false;
     }
 
-    private synchronized void init() throws Exception {
+    protected synchronized void init() throws Exception {
         try {
             try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators")) {
                 try (ResultSet rs = stmt.executeQuery()) {
