@@ -107,7 +107,11 @@ public class Main_Frame extends javax.swing.JFrame {
             }
             String perms = a.getPerms().toString().replace("[", "").replace("]", "").replace("add", "Agregar").replace("remove", "Remover").replace("modify", "Modificar") + ".";
             data[4] = perms;
-            data[5] = a.getLast_session();
+            if (a.getLast_session() != null) {
+                data[5] = a.getLast_session();
+            } else {
+                data[5] = "None";
+            }
 
             newModel.addRow(data);
         });

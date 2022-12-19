@@ -8,16 +8,34 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 
 public class HikariConnection {
+
+    @Getter
+    @Setter
+    private String user;
     
-    @Getter @Setter private String user;
-    @Getter @Setter private String password;
-    @Getter @Setter private int port;
-    @Getter @Setter private String database;
-    @Getter @Setter private String host;
+    @Getter
+    @Setter
+    private String password;
+    
+    @Getter
+    @Setter
+    private int port;
+    
+    @Getter
+    @Setter
+    private String database;
+    
+    @Getter
+    @Setter
+    private String host;
 
-    @Getter @Setter private String ssl;
+    @Getter
+    @Setter
+    private String ssl;
 
-    @Getter private final HikariDataSource DATA_SOURCE = new HikariDataSource();
+    @Getter
+    private final HikariDataSource DATA_SOURCE = new HikariDataSource();
+    
     private Connection connection;
 
     @SneakyThrows
@@ -30,6 +48,7 @@ public class HikariConnection {
         this.getDATA_SOURCE().addDataSourceProperty("databaseName", this.getDatabase());
         this.getDATA_SOURCE().addDataSourceProperty("autoReconnect", true);
         this.getDATA_SOURCE().addDataSourceProperty("characterEncoding", "latin1");
+        this.getDATA_SOURCE().addDataSourceProperty("allowPublicKeyRetrieval", "true");
 
         if (this.getSsl() == null) {
             this.getDATA_SOURCE().addDataSourceProperty("useSSL", "false");
@@ -44,9 +63,9 @@ public class HikariConnection {
     public synchronized void connect() throws SQLException {
         this.connection = this.getDATA_SOURCE().getConnection();
     }
-    
+
     public Connection getConnection() throws SQLException {
         return connection != null ? this.connection : null;
     }
-    
+
 }

@@ -109,49 +109,47 @@ public class AdministratorManager {
         return false;
     }
 
-    synchronized void init() throws Exception {
+    private synchronized void init() throws Exception {
         try {
-            PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators");
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    String newPass = rs.getString("password").replaceAll(".", "*");
-                    Administrator admin = new Administrator(rs.getInt("id"), rs.getString("name"), rs.getString("mail"), newPass, rs.getString("address"), new ArrayList<>(), "");
-
-                    if (rs.getString("perms").contains(",")) {
-                        String[] split = rs.getString("perms").split(",");
-                        boolean validStringPerms = false;
-                        for (String split1 : split) {
-                            if (split1.equals("add") || split1.equals("modify") || split1.equals("remove")) {
-                                validStringPerms = true;
+            try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators")) {
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        String newPass = rs.getString("password").replaceAll(".", "*");
+                        Administrator admin = new Administrator(rs.getInt("id"), rs.getString("name"), rs.getString("mail"), newPass, rs.getString("address"), new ArrayList<>(), "");
+                        
+                        if (rs.getString("perms").contains(",")) {
+                            String[] split = rs.getString("perms").split(",");
+                            boolean validStringPerms = false;
+                            for (String split1 : split) {
+                                if (split1.equals("add") || split1.equals("modify") || split1.equals("remove")) {
+                                    validStringPerms = true;
+                                } else {
+                                    Log.write(this.getClass(), new NoSpecifiedPermsException("The current permission string does not contains any existing permission (Add, remove, modify), please verify the upcoming permission string and try again."));
+                                }
+                            }
+                            
+                            if (validStringPerms) {
+                                admin.setPerms(Arrays.asList(split));
+                            }
+                        } else {
+                            if (rs.getString("perms").equals("add") || rs.getString("perms").equals("modify") || rs.getString("perms").equals("remove")) {
+                                admin.setPerms(Arrays.asList(rs.getString("perms")));
                             } else {
                                 Log.write(this.getClass(), new NoSpecifiedPermsException("The current permission string does not contains any existing permission (Add, remove, modify), please verify the upcoming permission string and try again."));
                             }
                         }
-
-                        if (validStringPerms) {
-                            admin.setPerms(Arrays.asList(split));
-                        }
-                    } else {
-                        if (rs.getString("perms").equals("add") || rs.getString("perms").equals("modify") || rs.getString("perms").equals("remove")) {
-                            admin.setPerms(Arrays.asList(rs.getString("perms")));
-                        } else {
-                            Log.write(this.getClass(), new NoSpecifiedPermsException("The current permission string does not contains any existing permission (Add, remove, modify), please verify the upcoming permission string and try again."));
-                        }
+                        
+                        this.getAdministrator_list().add(admin);
                     }
-
-                    this.getAdministrator_list().add(admin);
                 }
+                this.getAdministrator_list().forEach(a -> {
+                    try {
+                        this.updateLastSessionDate(a);
+                    } catch (SQLException ex) {
+                        Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
+                    }
+                });
             }
-
-            this.getAdministrator_list().forEach(a -> {
-                try {
-                    this.updateLastSessionDate(a);
-                } catch (SQLException ex) {
-                    Log.write(this.getClass(), ex.getLocalizedMessage(), 3);
-                }
-            });
-
-            stmt.close();
         } catch (SQLException e) {
             Log.write(this.getClass(), e.getLocalizedMessage(), 3);
         }

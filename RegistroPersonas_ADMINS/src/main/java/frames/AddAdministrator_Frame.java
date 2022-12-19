@@ -3,6 +3,8 @@ package frames;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import main.Main;
 import utils.Log;
@@ -26,52 +28,66 @@ public class AddAdministrator_Frame extends javax.swing.JInternalFrame {
         this.modifyCheckBox.setSelected(false);
     }
 
+    private boolean checkPassword(char[] pass) {
+        Pattern pCapL = Pattern.compile("([A-Z])");
+        Matcher mCapL = pCapL.matcher(new String(pass));
+        Pattern pNum = Pattern.compile("([0-9])");
+        Matcher mNum = pNum.matcher(new String(pass));
+        
+        return mCapL.find() && mNum.find();
+    }
+
     public void saveAdministrator() throws Exception {
         try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM administrators WHERE mail=?")) {
             stmt.setString(1, this.mailField.getText());
             try (ResultSet rs = stmt.executeQuery()) {
                 if (!rs.next()) {
                     if (!(this.nameField.getText().isEmpty() && this.mailField.getText().isEmpty() && this.passField.getPassword().length > 0)) {
-                        if (this.mailField.getText().contains("@")) {
-                            if (this.addCheckBox.isSelected() || this.removeCheckBox.isSelected() || this.modifyCheckBox.isSelected()) {
-                                
-                                String name = this.nameField.getText();
-                                String mail = this.mailField.getText();
-                                String pass = new String(this.passField.getPassword());
-                                String address = "None";
-                                
-                                if (!this.addressField.getText().isEmpty()) {
-                                    address = this.addressField.getText();
+                        if (this.checkPassword(this.passField.getPassword())) {
+                            if (this.mailField.getText().contains("@")) {
+                                if (this.addCheckBox.isSelected() || this.removeCheckBox.isSelected() || this.modifyCheckBox.isSelected()) {
+
+                                    String name = this.nameField.getText();
+                                    String mail = this.mailField.getText();
+                                    String pass = new String(this.passField.getPassword());
+                                    String address = "None";
+
+                                    if (!this.addressField.getText().isEmpty()) {
+                                        address = this.addressField.getText();
+                                    }
+
+                                    StringBuilder sb = new StringBuilder();
+                                    if (this.addCheckBox.isSelected()) {
+                                        sb.append("add").append(",");
+                                    }
+                                    if (this.modifyCheckBox.isSelected()) {
+                                        sb.append("modify").append(",");
+                                    }
+                                    if (this.removeCheckBox.isSelected()) {
+                                        sb.append("remove").append(",");
+                                    }
+                                    String perms = sb.toString().substring(0, sb.toString().length() - 1);
+
+                                    try (Statement st = Main.getMySQLConnection().createStatement()) {
+                                        st.execute("CREATE TABLE IF NOT EXISTS " + name + "_log (date VARCHAR(45) NOT NULL, log TEXT NOT NULL, PRIMARY KEY(date))");
+                                    }
+
+                                    Main.getAdministratorManager().createAdministrator(name, mail, pass, address, perms);
+                                    JOptionPane.showMessageDialog(null, "El administrador " + name + " fue agregado a la base de datos.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
+                                    this.clear();
+
+                                    Main.getMain_Frame().clearTable();
+                                    Main.getMain_Frame().fillTable(Main.getAdministratorManager().getAdministrator_list());
+
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Se requiere al menos 1 permiso para registrar al administrador.", "Permisos", JOptionPane.WARNING_MESSAGE);
                                 }
-                                
-                                StringBuilder sb = new StringBuilder();
-                                if (this.addCheckBox.isSelected()) {
-                                    sb.append("add").append(",");
-                                }
-                                if (this.modifyCheckBox.isSelected()) {
-                                    sb.append("modify").append(",");
-                                }
-                                if (this.removeCheckBox.isSelected()) {
-                                    sb.append("remove").append(",");
-                                }
-                                String perms = sb.toString().substring(0, sb.toString().length() - 1);
-                                
-                                try (Statement st = Main.getMySQLConnection().createStatement()) {
-                                    st.execute("CREATE TABLE IF NOT EXISTS " + name + "_log (date VARCHAR(45) NOT NULL, log TEXT NOT NULL, PRIMARY KEY(date))");
-                                }
-                                
-                                Main.getAdministratorManager().createAdministrator(name, mail, pass, address, perms);
-                                JOptionPane.showMessageDialog(null, "El administrador " + name + " fue agregado a la base de datos.", "Informacion", JOptionPane.INFORMATION_MESSAGE);
-                                this.clear();
-                                
-                                Main.getMain_Frame().clearTable();
-                                Main.getMain_Frame().fillTable(Main.getAdministratorManager().getAdministrator_list());
-                                
                             } else {
-                                JOptionPane.showMessageDialog(null, "Se requiere al menos 1 permiso para registrar al administrador.", "Permisos", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(null, "La direccion de correo electronico no es valida.", "Correo electronico", JOptionPane.WARNING_MESSAGE);
                             }
                         } else {
-                            JOptionPane.showMessageDialog(null, "La direccion de correo electronico no es valida.", "Correo electronico", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "La contraseña debe contener al menos un caracter en mayuscula y un numero.", "Contraseña", JOptionPane.WARNING_MESSAGE);
+                            this.passField.setText("");
                         }
                     } else {
                         JOptionPane.showMessageDialog(null, "Alguno de los campos necesarios no han sido llenados.", "Advertencia", JOptionPane.WARNING_MESSAGE);
@@ -253,7 +269,7 @@ public class AddAdministrator_Frame extends javax.swing.JInternalFrame {
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         try {
             this.saveAdministrator();
-            
+
             Main.getMain_Frame().closeAllInternalFrames();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "Un error ha sido encontrado: " + ex.getLocalizedMessage(), "Error", JOptionPane.ERROR_MESSAGE);
