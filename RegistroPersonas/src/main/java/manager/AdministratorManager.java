@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Optional;
 import lombok.Getter;
@@ -32,17 +31,10 @@ public class AdministratorManager {
 
     public Optional<Administrator> getAdministrator(String name) {
         if (!this.getAdministrator_list().isEmpty()) {
-            Iterator<Administrator> iterate = this.getAdministrator_list().iterator();
-            while (iterate.hasNext()) {
-                var a = iterate.next();
-                if (a.getName().equalsIgnoreCase(name)) {
-                    return Optional.of(a);
-                }
-            }
+            return this.getAdministrator_list().stream().filter(a -> a.getName().equals(name)).findFirst();
         } else {
             return Optional.empty();
         }
-        return Optional.empty();
     }
 
     synchronized void init() throws Exception {

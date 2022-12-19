@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Optional;
 import lombok.Getter;
@@ -31,16 +30,10 @@ public class PersonManager {
 
     public Optional<Person> getPerson(String name) {
         if (!this.getPerson_list().isEmpty()) {
-            Iterator<Person> iterate = this.getPerson_list().iterator();
-            while (iterate.hasNext()) {
-                var p = iterate.next();
-                if (p.getName().equalsIgnoreCase(name)) 
-                    return Optional.of(p);
-            }
+            return this.person_list.stream().filter(p -> p.getName().equals(name)).findFirst();
         } else {
             return Optional.empty();
         }
-        return Optional.empty();
     }
 
     public void createPerson(String name, String birth_date, String height, char gender) throws SQLException {
