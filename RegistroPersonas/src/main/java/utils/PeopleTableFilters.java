@@ -16,7 +16,7 @@ public class PeopleTableFilters {
     public void removeFiltres() throws SQLException {
         List<Person> list = new ArrayList<>();
         
-        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT * FROM people")) {
+        try (PreparedStatement stmt = Main.getMySQLConnection().prepareStatement("SELECT p.* FROM people p")) {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Person p = new Person(rs.getInt("id"), rs.getString("name"), rs.getString("birth_date"), rs.getString("height"), rs.getString("gender").charAt(0));
