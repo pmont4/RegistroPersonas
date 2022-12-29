@@ -6,8 +6,8 @@ public class Log {
     
     private static Logger logger;
     
-    public static void write(Class<?> c, Object toWrite, int level) {
-        logger = Logger.getLogger(c);
+    public static <T> void write(T c, Object toWrite, int level) {
+        logger = Logger.getLogger(c.getClass());
         switch (level) {
             case 0: {
                 logger.debug(toWrite);
@@ -32,8 +32,8 @@ public class Log {
         }
     }
     
-    public static void write(Class<?> c, Throwable t) {
-        logger = Logger.getLogger(c);
+    public static <T> void write(T c, Throwable t) {
+        logger = Logger.getLogger(c.getClass());
         logger.error(t.getLocalizedMessage(), t);
     }
 }
