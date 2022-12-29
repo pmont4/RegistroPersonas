@@ -6,7 +6,7 @@ public class Log {
     
     private static Logger logger;
     
-    public static <T> void write(T c, Object toWrite, int level) {
+    public static <T, V> void write(T c, V toWrite, int level) {
         logger = Logger.getLogger(c.getClass());
         switch (level) {
             case 0: {
