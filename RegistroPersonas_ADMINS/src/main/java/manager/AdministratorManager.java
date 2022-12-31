@@ -14,7 +14,7 @@ import utils.Log;
 import utils.NoSpecifiedPermsException;
 
 public class AdministratorManager {
-
+    
     @Getter
     private LinkedList<Administrator> administrator_list;
 
